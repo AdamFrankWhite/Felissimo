@@ -33,7 +33,7 @@ let destX = 0;
 let destY = 0;
 
 // Scale + positioning
-let scaleFactor = 0.3;
+let scaleFactor = 0.2;
 let XPos = innerWidth / 2 - spriteWidth * scaleFactor;
 let YPos = innerHeight - spriteHeight * scaleFactor;
 
@@ -83,28 +83,81 @@ function loadImages() {
 }
 // Handle sprite on click
 
-document.addEventListener("keydown", (e) => {
-    if (e.key == "ArrowLeft") {
-        srcY = 1 * spriteHeight;
-        direction = -1;
-        if (XPos > spriteWidth * scaleFactor) {
-            XPos -= 6;
-        }
-    }
-    if (e.key == "ArrowRight") {
-        srcY = 0 * spriteHeight;
-        direction = 1;
-        if (XPos < canvas.width - spriteWidth * scaleFactor) {
-            XPos += 6;
-        }
-    }
-});
+var keyState = {};
+window.addEventListener(
+    "keydown",
+    function (e) {
+        keyState[e.key] = true;
+    },
 
-document.addEventListener("keyup", (e) => {
-    if (e.key == "ArrowLeft") {
-        srcY = 9 * spriteHeight;
+    true
+);
+window.addEventListener(
+    "keyup",
+    function (e) {
+        keyState[e.key] = false;
+        console.log(innerHeight);
+        if (e.key == "ArrowLeft") {
+            srcY = 9 * spriteHeight;
+            totalFrames = 10;
+            if (XPos > spriteWidth * scaleFactor) {
+                XPos -= 6;
+            }
+        }
+        if (e.key == "ArrowRight") {
+            srcY = 8 * spriteHeight;
+            totalFrames = 10;
+            if (XPos < canvas.width - spriteWidth * scaleFactor) {
+                XPos += 6;
+            }
+        }
+    },
+
+    true
+);
+
+function gameLoop() {
+    // const idle = keyState.values(keyState).every((x) => x === null || x === "");
+    if (keyState["ArrowLeft"]) {
+        XPos -= 5;
+        srcY = 1 * spriteHeight;
+        totalFrames = 10;
+        console.log(innerHeight, YPos - spriteHeight * scaleFactor);
     }
-    if (e.key == "ArrowRight") {
-        srcY = 8 * spriteHeight;
+    if (keyState["ArrowRight"]) {
+        XPos += 5;
+        srcY = 0 * spriteHeight;
+        totalFrames = 10;
     }
-});
+    // if (keyState["ArrowLeft"] && keyState[" "]) {
+    //     srcY = 1 * spriteHeight;
+    //     totalFrames = 10;
+    // }
+
+    // if (keyState["ArrowRight"] && keyState[" "]) {
+    //     srcY = 1 * spriteHeight;
+    //     totalFrames = 10;
+    // }
+    if (keyState[" "]) {
+        srcY = 6 * spriteHeight;
+        totalFrames = 7;
+        if (YPos > 100) {
+            YPos -= 6;
+            setTimeout(() => {
+                YPos += 6;
+                srcY = 12 * spriteHeight;
+            }, 500);
+        }
+    } else if (
+        !keyState[" "] &&
+        !keyState["ArrowLeft"] &&
+        !keyState["ArrowRight"]
+    ) {
+        if (YPos + spriteHeight * scaleFactor == innerHeight) {
+            srcY = 8 * spriteHeight;
+        }
+    }
+
+    setTimeout(gameLoop, 20);
+}
+gameLoop();
