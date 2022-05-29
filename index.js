@@ -96,7 +96,6 @@ window.addEventListener(
     "keyup",
     function (e) {
         keyState[e.key] = false;
-        console.log(innerHeight);
         if (e.key == "ArrowLeft") {
             srcY = 9 * spriteHeight;
             totalFrames = 10;
@@ -119,14 +118,18 @@ window.addEventListener(
 function gameLoop() {
     // const idle = keyState.values(keyState).every((x) => x === null || x === "");
     if (keyState["ArrowLeft"]) {
-        XPos -= 5;
-        srcY = 1 * spriteHeight;
+        if (XPos > 10) {
+            XPos -= 5;
+            srcY = 1 * spriteHeight;
+        }
+
         totalFrames = 10;
-        console.log(innerHeight, YPos - spriteHeight * scaleFactor);
     }
     if (keyState["ArrowRight"]) {
-        XPos += 5;
-        srcY = 0 * spriteHeight;
+        if (XPos < innerWidth - spriteWidth * scaleFactor) {
+            XPos += 5;
+            srcY = 0 * spriteHeight;
+        }
         totalFrames = 10;
     }
     // if (keyState["ArrowLeft"] && keyState[" "]) {
