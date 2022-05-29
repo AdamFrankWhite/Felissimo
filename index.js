@@ -110,6 +110,10 @@ window.addEventListener(
                 XPos += 6;
             }
         }
+        if (e.key == " ") {
+            srcY = 1 * spriteHeight;
+            totalFrames = 10;
+        }
     },
 
     true
@@ -142,24 +146,25 @@ function gameLoop() {
     //     totalFrames = 10;
     // }
     if (keyState[" "]) {
-        srcY = 6 * spriteHeight;
+        // srcY = 5 * spriteHeight;
         totalFrames = 7;
         if (YPos > 100) {
             YPos -= 6;
             setTimeout(() => {
                 YPos += 6;
-                srcY = 12 * spriteHeight;
+                // srcY = 12 * spriteHeight;
             }, 500);
         }
-    } else if (
-        !keyState[" "] &&
-        !keyState["ArrowLeft"] &&
-        !keyState["ArrowRight"]
-    ) {
-        if (YPos + spriteHeight * scaleFactor == innerHeight) {
-            srcY = 8 * spriteHeight;
-        }
     }
+    // else if (
+    //     !keyState[" "] &&
+    //     !keyState["ArrowLeft"] &&
+    //     !keyState["ArrowRight"]
+    // ) {
+    //     if (YPos + spriteHeight * scaleFactor == innerHeight) {
+    //         srcY = 8 * spriteHeight;
+    //     }
+    // }
 
     setTimeout(gameLoop, 20);
 }
