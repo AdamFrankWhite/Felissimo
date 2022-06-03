@@ -33,25 +33,38 @@ class Player {
     }
 }
 
+const platformTexture = new Image();
+platformTexture.src = "/img/stones-146304.svg";
 class Platform {
     constructor(x, y) {
         this.position = {
             x,
             y,
         };
-        this.width = 200;
+        this.width = 175;
         this.height = 20;
     }
     draw() {
-        ctx.fillStyle = "blue";
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        // ctx.fillStyle = "blue";
+        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        ctx.drawImage(
+            platformTexture,
+            0,
+            0,
+            this.width,
+            this.height,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
+        );
     }
 }
 // set width and height to viewport dimensions
 
 canvas.width = innerWidth;
 canvas.height = innerHeight;
-
+// const platformTexture = new Image('./')
 const platformPositions = [
     { x: 300, y: 500 },
     { x: 700, y: 550 },
