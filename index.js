@@ -1,171 +1,142 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+const gravity = 1;
+
+class Player {
+    constructor() {
+        this.position = {
+            x: 100,
+            y: 100,
+        };
+        this.width = 30;
+        this.height = 30;
+        this.velocity = {
+            x: 0,
+            y: 0,
+        };
+    }
+    draw() {
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
+
+    update() {
+        this.draw();
+        this.position.y += this.velocity.y;
+        this.position.x += this.velocity.x;
+        if (this.position.y + this.height + this.velocity.y < canvas.height) {
+            this.velocity.y += gravity;
+        } else {
+            this.velocity.y = 0;
+        }
+    }
+}
+
+class Platform {
+    constructor(x, y) {
+        this.position = {
+            x,
+            y,
+        };
+        this.width = 200;
+        this.height = 20;
+    }
+    draw() {
+        ctx.fillStyle = "blue";
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
+}
 // set width and height to viewport dimensions
 
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-// Access sprite sheet
+const platformPositions = [
+    { x: 300, y: 500 },
+    { x: 700, y: 550 },
+    { x: 600, y: 350 },
+    { x: 800, y: 300 },
+    { x: 1000, y: 200 },
+];
 
-const catWalkSprite = new Image();
-catWalkSprite.src = "./img/sprite/cat_sprite.png";
-catWalkSprite.onload = loadImages;
-
-// 10 different walk images
-let cols = 10;
-let spriteWidth = catWalkSprite.width / 10;
-let spriteHeight = catWalkSprite.height / 16;
-ctx.webkitImageSmoothingEnabled = false;
-ctx.imageSmoothingEnabled = false;
-let totalFrames = 10;
-let currentFrame = 0;
-
-// Count frames drawn
-let framesDrawn = 0;
-let direction = 1;
-let offSetLeft = direction == 1 ? 0 : spriteWidth;
-// Update source position
-let srcX = 0;
-let srcY = 8 * spriteHeight;
-
-let destX = 0;
-let destY = 0;
-
-// Scale + positioning
-let scaleFactor = 0.2;
-let XPos = innerWidth / 2 - spriteWidth * scaleFactor;
-let YPos = innerHeight - spriteHeight * scaleFactor;
-
-const animate = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    requestAnimationFrame(animate);
-
-    // Work out current frame number
-    currentFrame = currentFrame % totalFrames;
-    srcX = currentFrame * spriteWidth; // update src position to next image in sprite
-    // image, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight
-
-    ctx.save();
-    resizeImage();
-
-    ctx.drawImage(
-        catWalkSprite,
-        srcX,
-        srcY,
-        spriteWidth,
-        spriteHeight,
-        destX,
-        destY,
-        spriteWidth,
-        spriteHeight
-    );
-
-    ctx.restore();
-    framesDrawn++;
-    if (framesDrawn >= 6) {
-        currentFrame++;
-        framesDrawn = 0;
-    }
+const player = new Player();
+const platforms = platformPositions.map(
+    (platform) => new Platform(platform.x, platform.y)
+);
+console.log(platforms);
+const getRectangleCollisions = () => {
+    platforms.forEach((platform) => {
+        if (
+            player.position.y + player.height <= platform.position.y &&
+            player.position.y + player.height + player.velocity.y >=
+                platform.position.y &&
+            player.position.x + player.width >= platform.position.x &&
+            player.position.x <= platform.position.x + platform.width
+        ) {
+            player.velocity.y = 0;
+        }
+    });
+};
+const keys = {
+    right: {
+        pressed: false,
+    },
+    left: {
+        pressed: false,
+    },
 };
 
-function resizeImage() {
-    ctx.translate(XPos, YPos);
-    ctx.scale(scaleFactor, scaleFactor);
-}
-
-// So canvas doesn't render before the image
-
-let numOfImages = 1;
-function loadImages() {
-    if (--numOfImages > 0) return;
-    animate();
-}
-// Handle sprite on click
-
-var keyState = {};
-window.addEventListener(
-    "keydown",
-    function (e) {
-        keyState[e.key] = true;
-    },
-
-    true
-);
-window.addEventListener(
-    "keyup",
-    function (e) {
-        keyState[e.key] = false;
-        if (e.key == "ArrowLeft") {
-            srcY = 9 * spriteHeight;
-            totalFrames = 10;
-            if (XPos > spriteWidth * scaleFactor) {
-                XPos -= 6;
-            }
-        }
-        if (e.key == "ArrowRight") {
-            srcY = 8 * spriteHeight;
-            totalFrames = 10;
-            if (XPos < canvas.width - spriteWidth * scaleFactor) {
-                XPos += 6;
-            }
-        }
-        if (e.key == " ") {
-            srcY = 1 * spriteHeight;
-            totalFrames = 10;
-        }
-    },
-
-    true
-);
-
-function gameLoop() {
-    // const idle = keyState.values(keyState).every((x) => x === null || x === "");
-    if (keyState["ArrowLeft"]) {
-        if (XPos > 10) {
-            XPos -= 5;
-            srcY = 1 * spriteHeight;
-        }
-
-        totalFrames = 10;
+const animate = () => {
+    requestAnimationFrame(animate);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    player.update();
+    platforms.forEach((platform) => platform.draw());
+    if (keys.right.pressed) {
+        player.velocity.x = 7;
+    } else if (keys.left.pressed) {
+        player.velocity.x = -7;
+    } else {
+        player.velocity.x = 0;
     }
-    if (keyState["ArrowRight"]) {
-        if (XPos < innerWidth - spriteWidth * scaleFactor) {
-            XPos += 5;
-            srcY = 0 * spriteHeight;
-        }
-        totalFrames = 10;
-    }
-    // if (keyState["ArrowLeft"] && keyState[" "]) {
-    //     srcY = 1 * spriteHeight;
-    //     totalFrames = 10;
-    // }
 
-    // if (keyState["ArrowRight"] && keyState[" "]) {
-    //     srcY = 1 * spriteHeight;
-    //     totalFrames = 10;
-    // }
-    if (keyState[" "]) {
-        // srcY = 5 * spriteHeight;
-        totalFrames = 7;
-        if (YPos > 100) {
-            YPos -= 6;
-            setTimeout(() => {
-                YPos += 6;
-                // srcY = 12 * spriteHeight;
-            }, 500);
-        }
-    }
-    // else if (
-    //     !keyState[" "] &&
-    //     !keyState["ArrowLeft"] &&
-    //     !keyState["ArrowRight"]
-    // ) {
-    //     if (YPos + spriteHeight * scaleFactor == innerHeight) {
-    //         srcY = 8 * spriteHeight;
-    //     }
-    // }
+    getRectangleCollisions(platforms);
+};
 
-    setTimeout(gameLoop, 20);
-}
-gameLoop();
+animate();
+
+addEventListener("keydown", ({ key }) => {
+    switch (key) {
+        case "a":
+            keys.left.pressed = true;
+            break;
+        case "s":
+            console.log("down");
+            break;
+        case "d":
+            keys.right.pressed = true;
+            break;
+        case "w":
+            console.log("up");
+            player.velocity.y -= 1;
+            break;
+    }
+});
+
+addEventListener("keyup", ({ key }) => {
+    switch (key) {
+        case "a":
+            keys.left.pressed = false;
+            break;
+        case "s":
+            console.log("down");
+            break;
+        case "d":
+            keys.right.pressed = false;
+            break;
+        case "w":
+            console.log("up");
+            player.velocity.y -= 20;
+            break;
+    }
+});
