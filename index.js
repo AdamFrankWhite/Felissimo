@@ -5,6 +5,7 @@ let sprite = new Image();
 sprite.src = "./img/sprite/idle-right.png";
 const gravity = 1;
 let isJumping = false;
+let jumpStrength = 1;
 class Player {
     constructor() {
         this.position = {
@@ -21,12 +22,6 @@ class Player {
         this.counter = 0;
     }
     draw() {
-        // ctx.fillStyle = "red";
-        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
-        // ctx.scale(-1, 1);
-        if (keys.left.pressed) {
-        }
-        console.log(sprite.src);
         ctx.drawImage(
             sprite,
             !sprite.src.includes("jump.png")
@@ -184,7 +179,12 @@ addEventListener("keydown", ({ key }) => {
             sprite.src = "./img/sprite/walk-left.png";
             break;
         case "s":
-            console.log("down");
+            if (keys.left.pressed) {
+                sprite.src = "./img/sprite/slide-left.png";
+            } else {
+                sprite.src = "./img/sprite/slide-right.png";
+            }
+
             break;
         case "d":
             console.log(player.velocity.y);
@@ -192,7 +192,6 @@ addEventListener("keydown", ({ key }) => {
             sprite.src = "./img/sprite/walk-right.png";
             break;
         case "w":
-            console.log("jump");
             // simply checking velocity y == 0 doesn't work as it can be greater due to gravity creating jumping bugginess
             // instead check state of jumping and check velocity is negligible as when landing it is sometimes 1/2/3
             // prevent double jumps
@@ -212,7 +211,12 @@ addEventListener("keyup", ({ key }) => {
             sprite.src = "./img/sprite/idle-left.png";
             break;
         case "s":
-            console.log("down");
+        case "s":
+            if (keys.left.pressed) {
+                sprite.src = "./img/sprite/walk-left.png";
+            } else {
+                sprite.src = "./img/sprite/walk-right.png";
+            }
             break;
         case "d":
             keys.right.pressed = false;
