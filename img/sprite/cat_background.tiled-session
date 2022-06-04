@@ -1,0 +1,38 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "C:/Users/adamw/Coding/Felissimo/img/Mossy - BackgroundDecoration.tsx": {
+            "scaleInDock": 0.33,
+            "scaleInEditor": 0.125
+        },
+        "C:/Users/adamw/Coding/Felissimo/img/Mossy - TileSet.tsx": {
+            "scaleInDock": 0.125,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/adamw/Coding/Felissimo/img/Mossy Assets/Mossy Tileset",
+    "map.height": 60,
+    "map.tileHeight": 12,
+    "map.tileWidth": 12,
+    "map.width": 200,
+    "openFiles": [
+        "C:/Users/adamw/Coding/Felissimo/img/Mossy - TileSet.tsx"
+    ],
+    "project": "cat_background.tiled-project",
+    "recentFiles": [
+        "C:/Users/adamw/Coding/Felissimo/img/Mossy - TileSet.tsx",
+        "C:/Users/adamw/Coding/Felissimo/img/Mossy - BackgroundDecoration.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 12,
+        "width": 12
+    }
+}
