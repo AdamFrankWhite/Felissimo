@@ -4,14 +4,14 @@ const ctx = canvas.getContext("2d");
 let sprite = new Image();
 sprite.src = "./img/sprite/idle-right.png";
 const gravity = 1;
-
+let isJumping = false;
 class Player {
     constructor() {
         this.position = {
             x: 100,
             y: 100,
         };
-        this.width = sprite.width / 40;
+        this.width = 136;
         this.height = sprite.height / 4;
         this.velocity = {
             x: 0,
@@ -26,13 +26,16 @@ class Player {
         // ctx.scale(-1, 1);
         if (keys.left.pressed) {
         }
+        console.log(sprite.src);
         ctx.drawImage(
             sprite,
-            sprite.src != "./img/sprite/jump.png"
+            !sprite.src.includes("jump.png")
                 ? (sprite.width / 10) * this.frames
                 : (sprite.width / 8) * this.frames,
             0,
-            sprite.width / 10,
+            !sprite.src.includes("jump.png")
+                ? sprite.width / 10
+                : sprite.width / 8,
             sprite.height,
             this.position.x,
             this.position.y,
@@ -45,21 +48,28 @@ class Player {
         if (this.counter == 3) {
             this.counter = 0;
             this.frames++;
-            if (this.frames == 9) {
+            if (!sprite.src.includes("jump.png") && this.frames == 9) {
+                this.frames = 0;
+            }
+            if (sprite.src.includes("jump.png") && this.frames == 7) {
                 this.frames = 0;
             }
         } else {
             this.counter++;
         }
 
-        this.draw();
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
         if (this.position.y + this.height + this.velocity.y < canvas.height) {
             this.velocity.y += gravity;
         } else {
             this.velocity.y = 0;
+            isJumping = false;
         }
+        // if (!isFalling && !isJumping) {
+        //     sprite.src = "./img/sprite/idle-right.png";
+        // }
+        this.draw();
     }
 }
 
@@ -116,14 +126,16 @@ let platforms = platformPositions.map(
 console.log(platforms);
 const getRectangleCollisions = () => {
     platforms.forEach((platform) => {
+        // Added width offsets to cater to sprite's padding
         if (
             player.position.y + player.height <= platform.position.y &&
             player.position.y + player.height + player.velocity.y >=
                 platform.position.y &&
-            player.position.x + player.width >= platform.position.x &&
-            player.position.x <= platform.position.x + platform.width
+            player.position.x + player.width - 60 >= platform.position.x &&
+            player.position.x + 50 <= platform.position.x + platform.width
         ) {
             player.velocity.y = 0;
+            isJumping = false;
         }
     });
 };
@@ -139,11 +151,11 @@ const keys = {
 const animate = () => {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    player.update();
+    // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
     if (keys.right.pressed && player.position.x < 750) {
         player.velocity.x = 7;
-    } else if (keys.left.pressed && player.position.x > 100) {
+    } else if (keys.left.pressed && player.position.x > 450) {
         player.velocity.x = -7;
     } else {
         player.velocity.x = 0;
@@ -159,7 +171,7 @@ const animate = () => {
             });
         }
     }
-
+    player.update();
     getRectangleCollisions(platforms);
 };
 
@@ -175,16 +187,20 @@ addEventListener("keydown", ({ key }) => {
             console.log("down");
             break;
         case "d":
+            console.log(player.velocity.y);
             keys.right.pressed = true;
             sprite.src = "./img/sprite/walk-right.png";
             break;
         case "w":
-            console.log("up");
+            console.log("jump");
+            // simply checking velocity y == 0 doesn't work as it can be greater due to gravity creating jumping bugginess
+            // instead check state of jumping and check velocity is negligible as when landing it is sometimes 1/2/3
             // prevent double jumps
-            if (player.velocity.y == 0) {
+
+            if (!isJumping && player.velocity.y <= 5) {
                 player.velocity.y -= 20;
-                // sprite.src = "./img/sprite/jump.png";
             }
+            isJumping = true;
             break;
     }
 });
@@ -203,8 +219,6 @@ addEventListener("keyup", ({ key }) => {
             sprite.src = "./img/sprite/idle-right.png";
             break;
         case "w":
-            console.log("up");
-            // player.velocity.y -= 20;
             break;
     }
 });
