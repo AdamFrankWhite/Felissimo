@@ -3,13 +3,17 @@ const ctx = canvas.getContext("2d");
 
 let sprite = new Image();
 sprite.src = "./img/sprite/idle-right.png";
+
+let fishPNG = new Image();
+fishPNG.src = "./img/fish.png";
+
 const gravity = 1;
 let isJumping = false;
 let jumpStrength = 1;
 class Player {
     constructor() {
         this.position = {
-            x: 100,
+            x: 300,
             y: 100,
         };
         this.width = 136;
@@ -95,6 +99,35 @@ class Platform {
         );
     }
 }
+
+// Fish
+
+class Fish {
+    constructor(x, y) {
+        this.position = {
+            x,
+            y,
+        };
+        this.width = fishPNG.width;
+        this.height = fishPNG.height;
+    }
+    draw() {
+        // ctx.fillStyle = "blue";
+        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        ctx.drawImage(
+            fishPNG,
+            0,
+            0,
+            this.width * 4,
+            this.height * 4,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
+        );
+    }
+}
+
 // set width and height to viewport dimensions
 
 canvas.width = innerWidth;
@@ -118,7 +151,18 @@ const player = new Player();
 let platforms = platformPositions.map(
     (platform) => new Platform(platform.x, platform.y)
 );
-console.log(platforms);
+
+const fishPositions = [
+    { x: 0, y: 600 },
+    { x: 700, y: 600 },
+    { x: 600, y: 250 },
+    { x: 800, y: 500 },
+    { x: 1000, y: 300 },
+    { x: 1200, y: 400 },
+];
+
+let fishes = fishPositions.map((fish) => new Fish(fish.x, fish.y));
+
 const getRectangleCollisions = () => {
     platforms.forEach((platform) => {
         // Added width offsets to cater to sprite's padding
@@ -131,6 +175,21 @@ const getRectangleCollisions = () => {
         ) {
             player.velocity.y = 0;
             isJumping = false;
+        }
+    });
+
+    fishes.forEach((fish) => {
+        // Added width offsets to cater to sprite's padding
+        if (
+            player.position.y <= fish.position.y &&
+            player.position.y + player.height + player.velocity.y >=
+                fish.position.y &&
+            player.position.x + player.width - 60 >= fish.position.x &&
+            player.position.x + 50 <= fish.position.x + fish.width
+        ) {
+            fishes = fishes.filter(
+                (currentFish) => fish.position.x != currentFish.position.x
+            );
         }
     });
 };
@@ -148,6 +207,7 @@ const animate = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
+    fishes.forEach((fish) => fish.draw());
     if (keys.right.pressed && player.position.x < 750) {
         player.velocity.x = 7;
     } else if (keys.left.pressed && player.position.x > 450) {
@@ -159,10 +219,18 @@ const animate = () => {
                 platform.position.x -= 5;
                 return platform;
             });
+            fishes = fishes.map((fish) => {
+                fish.position.x -= 5;
+                return fish;
+            });
         } else if (keys.left.pressed) {
             platforms = platforms.map((platform) => {
                 platform.position.x += 5;
                 return platform;
+            });
+            fishes = fishes.map((fish) => {
+                fish.position.x += 5;
+                return fish;
             });
         }
     }
