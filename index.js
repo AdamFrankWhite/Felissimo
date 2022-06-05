@@ -185,7 +185,7 @@ const getRectangleCollisions = () => {
             player.position.y + player.height + player.velocity.y >=
                 fish.position.y &&
             player.position.x + player.width - 60 >= fish.position.x &&
-            player.position.x + 50 <= fish.position.x + fish.width
+            player.position.x + 40 <= fish.position.x + fish.width / 4
         ) {
             fishes = fishes.filter(
                 (currentFish) => fish.position.x != currentFish.position.x
