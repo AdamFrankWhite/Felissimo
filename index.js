@@ -7,10 +7,30 @@ sprite.src = "./img/sprite/idle-right.png";
 let fishPNG = new Image();
 fishPNG.src = "./img/fish.png";
 
+let catnipPNG = new Image();
+catnipPNG.src = "./img/catnip.png";
+
 let score = 0;
+let catnipTimer = 0;
 const gravity = 1;
 let isJumping = false;
+let isHighOnCatnip = false;
 let jumpStrength = 1;
+
+const setCatnipTimer = () => {
+    isHighOnCatnip = true;
+    catnipTimer = 5;
+    doTimer();
+};
+
+const doTimer = () => {
+    setInterval(() => {
+        if (catnipTimer > 0) {
+            catnipTimer--;
+        } else isHighOnCatnip = false;
+    }, 1000);
+};
+
 class Player {
     constructor() {
         this.position = {
@@ -103,20 +123,22 @@ class Platform {
 
 // Fish
 
-class Fish {
-    constructor(x, y) {
+class Item {
+    constructor(x, y, image, itemType) {
         this.position = {
             x,
             y,
         };
-        this.width = fishPNG.width;
-        this.height = fishPNG.height;
+        this.width = image.width;
+        this.height = image.height;
+        this.image = image;
+        this.itemType = itemType;
     }
     draw() {
         // ctx.fillStyle = "blue";
         // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
         ctx.drawImage(
-            fishPNG,
+            this.image,
             0,
             0,
             this.width * 4,
@@ -162,7 +184,18 @@ const fishPositions = [
     { x: 1200, y: 400 },
 ];
 
-let fishes = fishPositions.map((fish) => new Fish(fish.x, fish.y));
+const catnipPositions = [
+    { x: 0, y: 600 },
+    { x: 700, y: 200 },
+];
+
+let fishes = fishPositions.map(
+    (item) => new Item(item.x, item.y, fishPNG, "fish")
+);
+
+let catnip = catnipPositions.map(
+    (item) => new Item(item.x, item.y, catnipPNG, "catnip")
+);
 
 const getRectangleCollisions = () => {
     platforms.forEach((platform) => {
@@ -194,6 +227,22 @@ const getRectangleCollisions = () => {
             score += 50;
         }
     });
+
+    catnip.forEach((leaf) => {
+        // Added width offsets to cater to sprite's padding
+        if (
+            player.position.y <= leaf.position.y &&
+            player.position.y + player.height + player.velocity.y >=
+                leaf.position.y &&
+            player.position.x + player.width - 60 >= leaf.position.x &&
+            player.position.x + 40 <= leaf.position.x + leaf.width / 4
+        ) {
+            catnip = catnip.filter(
+                (currentLeaf) => leaf.position.x != currentLeaf.position.x
+            );
+            setCatnipTimer();
+        }
+    });
 };
 const keys = {
     right: {
@@ -211,35 +260,79 @@ const animate = () => {
     // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
     fishes.forEach((fish) => fish.draw());
+    catnip.forEach((leaf) => leaf.draw());
     if (keys.right.pressed && player.position.x < 750) {
-        player.velocity.x = 7;
+        if (isHighOnCatnip) {
+            player.velocity.x = 20;
+        } else {
+            player.velocity.x = 7;
+        }
     } else if (keys.left.pressed && player.position.x > 450) {
-        player.velocity.x = -7;
+        if (isHighOnCatnip) {
+            player.velocity.x = -20;
+        } else {
+            player.velocity.x = -7;
+        }
     } else {
         player.velocity.x = 0;
         if (keys.right.pressed) {
             platforms = platforms.map((platform) => {
-                platform.position.x -= 5;
+                if (isHighOnCatnip) {
+                    platform.position.x -= 10;
+                } else {
+                    platform.position.x -= 5;
+                }
+
                 return platform;
             });
             fishes = fishes.map((fish) => {
-                fish.position.x -= 5;
+                if (isHighOnCatnip) {
+                    fish.position.x -= 10;
+                } else {
+                    fish.position.x -= 5;
+                }
+
                 return fish;
+            });
+            catnip = catnip.map((leaf) => {
+                if (isHighOnCatnip) {
+                    leaf.position.x -= 10;
+                } else {
+                    leaf.position.x -= 5;
+                }
+                return leaf;
             });
         } else if (keys.left.pressed) {
             platforms = platforms.map((platform) => {
-                platform.position.x += 5;
+                if (isHighOnCatnip) {
+                    platform.position.x += 10;
+                } else {
+                    platform.position.x += 5;
+                }
                 return platform;
             });
             fishes = fishes.map((fish) => {
-                fish.position.x += 5;
+                if (isHighOnCatnip) {
+                    fish.position.x += 10;
+                } else {
+                    fish.position.x += 5;
+                }
                 return fish;
+            });
+            catnip = catnip.map((leaf) => {
+                if (isHighOnCatnip) {
+                    leaf.position.x += 10;
+                } else {
+                    leaf.position.x += 5;
+                }
+                return leaf;
             });
         }
     }
     ctx.font = "40px Garamond";
     ctx.fillStyle = "yellow";
     ctx.fillText(`Score: ${score}`, 50, 50);
+    ctx.fillText(`Catnip Timer: ${catnipTimer}`, 50, 150);
     player.update();
     getRectangleCollisions(platforms);
 };
@@ -249,8 +342,9 @@ animate();
 addEventListener("keydown", ({ key }) => {
     switch (key) {
         case "a":
-            keys.left.pressed = true;
             sprite.src = "./img/sprite/walk-left.png";
+            keys.left.pressed = true;
+
             break;
         case "s":
             if (keys.left.pressed) {
@@ -261,9 +355,9 @@ addEventListener("keydown", ({ key }) => {
 
             break;
         case "d":
-            console.log(player.velocity.y);
-            keys.right.pressed = true;
             sprite.src = "./img/sprite/walk-right.png";
+            keys.right.pressed = true;
+
             break;
         case "w":
             // simply checking velocity y == 0 doesn't work as it can be greater due to gravity creating jumping bugginess
@@ -282,9 +376,11 @@ addEventListener("keyup", ({ key }) => {
     switch (key) {
         case "a":
             keys.left.pressed = false;
-            sprite.src = "./img/sprite/idle-left.png";
+            // ensure right key is depressed to avoid sprite bug when rapidly changing direction
+            if (!keys.right.pressed) {
+                sprite.src = "./img/sprite/idle-left.png";
+            }
             break;
-        case "s":
         case "s":
             if (keys.left.pressed) {
                 sprite.src = "./img/sprite/walk-left.png";
@@ -294,7 +390,10 @@ addEventListener("keyup", ({ key }) => {
             break;
         case "d":
             keys.right.pressed = false;
-            sprite.src = "./img/sprite/idle-right.png";
+            // ensure left key is depressed to avoid sprite bug when rapidly changing direction
+            if (!keys.left.pressed) {
+                sprite.src = "./img/sprite/idle-right.png";
+            }
             break;
         case "w":
             break;
