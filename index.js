@@ -297,12 +297,13 @@ const getRectangleCollisions = () => {
             player.position.x + 50 <= enemy.position.x + enemy.width
         ) {
             // set counter frames to 0 to avoid glitchy sprite
-            enemy.counter = 0;
-            enemy.frames = 0;
-            boarToRemove = enemy;
+
             // only bounce on initial boar jump
             if (!boarPNG.src.includes("boar-dead.png")) {
                 player.velocity.y = -15;
+                enemy.counter = 0;
+                enemy.frames = 0;
+                boarToRemove = enemy;
             }
 
             boarPNG.src = "./img/sprite/boar-dead.png";
