@@ -7,6 +7,7 @@ sprite.src = "./img/sprite/idle-right.png";
 let fishPNG = new Image();
 fishPNG.src = "./img/fish.png";
 
+let score = 0;
 const gravity = 1;
 let isJumping = false;
 let jumpStrength = 1;
@@ -190,6 +191,7 @@ const getRectangleCollisions = () => {
             fishes = fishes.filter(
                 (currentFish) => fish.position.x != currentFish.position.x
             );
+            score += 50;
         }
     });
 };
@@ -205,6 +207,7 @@ const keys = {
 const animate = () => {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
     fishes.forEach((fish) => fish.draw());
@@ -234,6 +237,9 @@ const animate = () => {
             });
         }
     }
+    ctx.font = "40px Garamond";
+    ctx.fillStyle = "yellow";
+    ctx.fillText(`Score: ${score}`, 50, 50);
     player.update();
     getRectangleCollisions(platforms);
 };
