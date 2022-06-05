@@ -138,11 +138,14 @@ class Enemy {
             this.frames++;
 
             if (boarPNG.src.includes("boar-dead.png") && this.frames == 9) {
-                // once sprite complete, remove board
-                enemies = enemies.filter((enemy) => {
-                    console.log(enemy, boarToRemove);
-                    return enemy.id != boarToRemove.id;
-                });
+                // once sprite complete, remove boar after slight delay
+                setTimeout(() => {
+                    enemies = enemies.filter((enemy) => {
+                        console.log(enemy, boarToRemove);
+                        return enemy.id != boarToRemove.id;
+                    });
+                }, 500);
+
                 // this.frames = 0;
             } else if (this.frames == 17) {
                 this.frames = 0;
@@ -293,8 +296,15 @@ const getRectangleCollisions = () => {
             player.position.x + player.width - 60 >= enemy.position.x &&
             player.position.x + 50 <= enemy.position.x + enemy.width
         ) {
+            // set counter frames to 0 to avoid glitchy sprite
+            enemy.counter = 0;
+            enemy.frames = 0;
             boarToRemove = enemy;
-            player.velocity.y = -15;
+            // only bounce on initial boar jump
+            if (!boarPNG.src.includes("boar-dead.png")) {
+                player.velocity.y = -15;
+            }
+
             boarPNG.src = "./img/sprite/boar-dead.png";
         }
     });
