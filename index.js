@@ -10,13 +10,19 @@ fishPNG.src = "./img/fish.png";
 let catnipPNG = new Image();
 catnipPNG.src = "./img/catnip.png";
 
+let boarPNG = new Image();
+boarPNG.src = "./img/sprite/boar-sleep.png";
+
+// let poof = new Image();
+// poof.src = "./img/sprite/poof.png";
+
 let score = 0;
 let catnipTimer = 0;
 const gravity = 1;
 let isJumping = false;
 let isHighOnCatnip = false;
 let jumpStrength = 1;
-
+let boarToRemove;
 const setCatnipTimer = () => {
     isHighOnCatnip = true;
     catnipTimer = 5;
@@ -65,6 +71,7 @@ class Player {
     }
 
     update() {
+        // slow down animation by 3
         if (this.counter == 3) {
             this.counter = 0;
             this.frames++;
@@ -93,6 +100,71 @@ class Player {
     }
 }
 
+class Enemy {
+    constructor(x, y, image, id) {
+        this.id = id;
+        this.position = {
+            x,
+            y,
+        };
+        this.width = 720;
+        this.height = 512;
+        this.velocity = {
+            x: 0,
+            y: 0,
+        };
+        this.frames = 0;
+        this.counter = 0;
+        this.image = image;
+    }
+    draw() {
+        ctx.drawImage(
+            this.image,
+            this.width * this.frames,
+            0,
+            this.width,
+            this.height,
+            this.position.x,
+            this.position.y,
+            this.width / 5,
+            this.height / 5
+        );
+    }
+
+    update() {
+        // slow down animation by 3
+        if (this.counter == 3) {
+            this.counter = 0;
+            this.frames++;
+
+            if (boarPNG.src.includes("boar-dead.png") && this.frames == 9) {
+                // once sprite complete, remove board
+                enemies = enemies.filter((enemy) => {
+                    console.log(enemy, boarToRemove);
+                    return enemy.id != boarToRemove.id;
+                });
+                // this.frames = 0;
+            } else if (this.frames == 17) {
+                this.frames = 0;
+            }
+        } else {
+            this.counter++;
+        }
+        this.position.y += this.velocity.y;
+        this.position.x += this.velocity.x;
+        if (this.position.y + this.height + this.velocity.y < canvas.height) {
+            this.velocity.y += gravity;
+        } else {
+            this.velocity.y = 0;
+        }
+        // if (!isFalling && !isJumping) {
+        //     sprite.src = "./img/sprite/idle-right.png";
+        // }
+        this.draw();
+    }
+}
+
+let enemies = [new Enemy(500, 600, boarPNG, 1)];
 const platformTexture = new Image();
 platformTexture.src = "/img/stones-146304.svg";
 class Platform {
@@ -212,6 +284,21 @@ const getRectangleCollisions = () => {
         }
     });
 
+    enemies.forEach((enemy) => {
+        // Added width offsets to cater to sprite's padding
+        if (
+            player.position.y + player.height <= enemy.position.y &&
+            player.position.y + player.height + player.velocity.y >=
+                enemy.position.y &&
+            player.position.x + player.width - 60 >= enemy.position.x &&
+            player.position.x + 50 <= enemy.position.x + enemy.width
+        ) {
+            boarToRemove = enemy;
+            player.velocity.y = -15;
+            boarPNG.src = "./img/sprite/boar-dead.png";
+        }
+    });
+
     fishes.forEach((fish) => {
         // Added width offsets to cater to sprite's padding
         if (
@@ -261,6 +348,7 @@ const animate = () => {
     platforms.forEach((platform) => platform.draw());
     fishes.forEach((fish) => fish.draw());
     catnip.forEach((leaf) => leaf.draw());
+    enemies.forEach((enemy) => enemy.update());
     if (keys.right.pressed && player.position.x < 750) {
         if (isHighOnCatnip) {
             player.velocity.x = 20;
@@ -284,6 +372,15 @@ const animate = () => {
                 }
 
                 return platform;
+            });
+            enemies = enemies.map((enemy) => {
+                if (isHighOnCatnip) {
+                    enemy.position.x -= 10;
+                } else {
+                    enemy.position.x -= 5;
+                }
+
+                return enemy;
             });
             fishes = fishes.map((fish) => {
                 if (isHighOnCatnip) {
@@ -310,6 +407,15 @@ const animate = () => {
                     platform.position.x += 5;
                 }
                 return platform;
+            });
+            enemies = enemies.map((enemy) => {
+                if (isHighOnCatnip) {
+                    enemy.position.x += 10;
+                } else {
+                    enemy.position.x += 5;
+                }
+
+                return enemy;
             });
             fishes = fishes.map((fish) => {
                 if (isHighOnCatnip) {
