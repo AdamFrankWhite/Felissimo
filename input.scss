@@ -12,5 +12,8 @@ canvas {
     background-size: cover;
     background-position-y: 15%;
     display: block;
-    margin: auto;
+    margin: auto;  
+    filter: sepia(4);
+    filter: saturate(3.5);
+  
 }

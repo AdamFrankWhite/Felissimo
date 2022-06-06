@@ -21,6 +21,7 @@ let catnipTimer = 0;
 const gravity = 1;
 let isJumping = false;
 let isHighOnCatnip = false;
+let isPlayerHurt = false;
 let jumpStrength = 1;
 let boarToRemove;
 const setCatnipTimer = () => {
@@ -71,6 +72,7 @@ class Player {
     }
 
     update() {
+        if (isPlayerHurt) sprite.src = "./img/sprite/hurt.png";
         // slow down animation by 3
         if (this.counter == 3) {
             this.counter = 0;
@@ -78,7 +80,7 @@ class Player {
             if (!sprite.src.includes("jump.png") && this.frames == 9) {
                 this.frames = 0;
             }
-            if (sprite.src.includes("jump.png") && this.frames == 7) {
+            if (sprite.src.includes("hurt.png") && this.frames == 6) {
                 this.frames = 0;
             }
         } else {
@@ -147,6 +149,11 @@ class Enemy {
                 }, 500);
 
                 // this.frames = 0;
+            } else if (boarPNG.src.includes("boar-jump") && this.frames == 6) {
+                // once sprite complete, remove boar after slight delay
+                setTimeout(() => {
+                    boarPNG.src = "./img/sprite/boar-sleep.png";
+                }, 2000);
             } else if (this.frames == 17) {
                 this.frames = 0;
             }
@@ -289,6 +296,8 @@ const getRectangleCollisions = () => {
 
     enemies.forEach((enemy) => {
         // Added width offsets to cater to sprite's padding
+
+        //jump on enemy
         if (
             player.position.y + player.height <= enemy.position.y &&
             player.position.y + player.height + player.velocity.y >=
@@ -307,6 +316,31 @@ const getRectangleCollisions = () => {
             }
 
             boarPNG.src = "./img/sprite/boar-dead.png";
+        }
+
+        // touch enemy
+        else if (
+            player.position.y <= enemy.position.y &&
+            player.position.y + player.height + player.velocity.y >=
+                enemy.position.y &&
+            player.position.x + player.width - 60 >= enemy.position.x &&
+            player.position.x + 40 <= enemy.position.x + enemy.width / 5
+        ) {
+            // set counter frames to 0 to avoid glitchy sprite
+
+            // only bounce on initial boar jump
+            // if (!boarPNG.src.includes("boar-dead.png")) {
+
+            enemy.counter = 0;
+            enemy.frames = 0;
+            // }
+
+            boarPNG.src = "./img/sprite/boar-walk-right.png";
+            isPlayerHurt = true;
+            setTimeout(() => {
+                isPlayerHurt = false;
+                sprite.src = "./img/sprite/idle-right.png";
+            }, 400);
         }
     });
 
@@ -360,7 +394,9 @@ const animate = () => {
     fishes.forEach((fish) => fish.draw());
     catnip.forEach((leaf) => leaf.draw());
     enemies.forEach((enemy) => enemy.update());
-    if (keys.right.pressed && player.position.x < 750) {
+    if (isPlayerHurt) {
+        player.velocity.x = -5;
+    } else if (keys.right.pressed && player.position.x < 750) {
         if (isHighOnCatnip) {
             player.velocity.x = 20;
         } else {
