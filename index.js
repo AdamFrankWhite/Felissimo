@@ -446,6 +446,14 @@ const getRectangleCollisions = () => {
             if (healthBar.width < 400) {
                 healthBar.width += 50;
             }
+
+            if (healthBar.width <= 100) {
+                healthBarImg.src = barRed;
+            } else if (healthBar.width <= 250) {
+                healthBarImg.src = barOrange;
+            } else if (healthBar.width > 250) {
+                healthBarImg.src = barGreen;
+            }
         }
     });
 
