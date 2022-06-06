@@ -12,7 +12,8 @@ catnipPNG.src = "./img/catnip.png";
 
 let boarPNG = new Image();
 boarPNG.src = "./img/sprite/boar-sleep.png";
-
+let catnipBarImg = new Image();
+catnipBarImg.src = "./img/bar-blue.png";
 let healthBarImg = new Image();
 let barGreen = "./img/bar-green.png";
 let barOrange = "./img/bar-orange.png";
@@ -32,15 +33,18 @@ let boarToRemove;
 const setCatnipTimer = () => {
     isHighOnCatnip = true;
     catnipTimer = 5;
+    catnipBar.width = 400;
     doTimer();
 };
 
 const doTimer = () => {
     setInterval(() => {
         if (catnipTimer > 0) {
-            catnipTimer--;
+            // divided all by 40 for smoother animation
+            catnipTimer -= 1 / 40;
+            catnipBar.width -= 2;
         } else isHighOnCatnip = false;
-    }, 1000);
+    }, 25);
 };
 
 const setBoarMotion = () => {
@@ -224,18 +228,19 @@ platformTexture.src = "/img/stones-146304.svg";
 
 // Health bar
 
-class HealthBar {
-    constructor(x, y) {
+class ProgressBar {
+    constructor(x, y, initWidth, image) {
         this.position = {
             x,
             y,
         };
-        this.width = 400;
+        this.width = initWidth;
         this.height = 50;
+        this.image = image;
     }
     draw() {
         ctx.drawImage(
-            healthBarImg,
+            this.image,
             0,
             0,
             this.width,
@@ -248,7 +253,8 @@ class HealthBar {
     }
 }
 
-let healthBar = new HealthBar(50, 50);
+let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
+let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
 
 class Platform {
     constructor(x, y) {
@@ -414,6 +420,8 @@ const getRectangleCollisions = () => {
                 healthBarImg.src = barRed;
             } else if (healthBar.width <= 250) {
                 healthBarImg.src = barOrange;
+            } else if (healthBar.width == 400) {
+                healthBarImg.src = barGreen;
             }
             setTimeout(() => {
                 isPlayerHurt = false;
@@ -470,6 +478,7 @@ const animate = () => {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     healthBar.draw();
+    catnipBar.draw();
     // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
     fishes.forEach((fish) => fish.draw());
@@ -563,10 +572,7 @@ const animate = () => {
             });
         }
     }
-    ctx.font = "40px Garamond";
-    ctx.fillStyle = "yellow";
-    ctx.fillText(`Score: ${score}`, 50, 50);
-    ctx.fillText(`Catnip Timer: ${catnipTimer}`, 50, 150);
+
     player.update();
     getRectangleCollisions(platforms);
 };
