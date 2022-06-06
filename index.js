@@ -22,6 +22,8 @@ const gravity = 1;
 let isJumping = false;
 let isHighOnCatnip = false;
 let isPlayerHurt = false;
+let boarMovementTimer = 0;
+let boarDirection;
 let jumpStrength = 1;
 let boarToRemove;
 const setCatnipTimer = () => {
@@ -36,6 +38,33 @@ const doTimer = () => {
             catnipTimer--;
         } else isHighOnCatnip = false;
     }, 1000);
+};
+
+const setBoarMotion = () => {
+    boarMovementTimer = 2;
+    switchBoarMovement();
+};
+
+const switchBoarMovement = () => {
+    boarDirection = "right";
+    setInterval(() => {
+        console.log(boarMovementTimer, boarDirection);
+        if (boarMovementTimer > 0) {
+            if (boarDirection == "left") {
+                boarDirection = "right";
+            } else if (boarDirection == "right") {
+                boarDirection = "left";
+            }
+            boarMovementTimer--;
+        } else {
+            if (boarDirection == "left") {
+                boarDirection = "right";
+            } else if (boarDirection == "right") {
+                boarDirection = "left";
+            }
+            boarMovementTimer = 2;
+        }
+    }, 2000);
 };
 
 class Player {
@@ -103,7 +132,7 @@ class Player {
 }
 
 class Enemy {
-    constructor(x, y, image, id) {
+    constructor(x, y, image, id, moving) {
         this.id = id;
         this.position = {
             x,
@@ -118,6 +147,7 @@ class Enemy {
         this.frames = 0;
         this.counter = 0;
         this.image = image;
+        this.moving = moving;
     }
     draw() {
         ctx.drawImage(
@@ -160,6 +190,15 @@ class Enemy {
         } else {
             this.counter++;
         }
+
+        if (boarDirection == "left") {
+            boarPNG.src = "./img/sprite/boar-walk-left.png";
+            this.velocity.x = -2.5;
+        } else if (boarDirection == "right") {
+            boarPNG.src = "./img/sprite/boar-walk-right.png";
+            this.velocity.x = 2.5;
+        }
+
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
         if (this.position.y + this.height + this.velocity.y < canvas.height) {
@@ -174,7 +213,7 @@ class Enemy {
     }
 }
 
-let enemies = [new Enemy(500, 600, boarPNG, 1)];
+let enemies = [new Enemy(500, 600, boarPNG, 1, false)];
 const platformTexture = new Image();
 platformTexture.src = "/img/stones-146304.svg";
 class Platform {
@@ -335,7 +374,7 @@ const getRectangleCollisions = () => {
             enemy.frames = 0;
             // }
 
-            boarPNG.src = "./img/sprite/boar-walk-right.png";
+            setBoarMotion();
             isPlayerHurt = true;
             setTimeout(() => {
                 isPlayerHurt = false;
