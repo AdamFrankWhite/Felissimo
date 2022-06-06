@@ -13,8 +13,11 @@ catnipPNG.src = "./img/catnip.png";
 let boarPNG = new Image();
 boarPNG.src = "./img/sprite/boar-sleep.png";
 
-// let poof = new Image();
-// poof.src = "./img/sprite/poof.png";
+let healthBarImg = new Image();
+let barGreen = "./img/bar-green.png";
+let barOrange = "./img/bar-orange.png";
+let barRed = "./img/bar-red.png";
+healthBarImg.src = barGreen;
 
 let score = 0;
 let catnipTimer = 0;
@@ -218,6 +221,35 @@ class Enemy {
 let enemies = [new Enemy(500, 600, boarPNG, 1, false)];
 const platformTexture = new Image();
 platformTexture.src = "/img/stones-146304.svg";
+
+// Health bar
+
+class HealthBar {
+    constructor(x, y) {
+        this.position = {
+            x,
+            y,
+        };
+        this.width = 400;
+        this.height = 50;
+    }
+    draw() {
+        ctx.drawImage(
+            healthBarImg,
+            0,
+            0,
+            this.width,
+            this.height,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
+        );
+    }
+}
+
+let healthBar = new HealthBar(50, 50);
+
 class Platform {
     constructor(x, y) {
         this.position = {
@@ -377,6 +409,12 @@ const getRectangleCollisions = () => {
             // }
             setBoarMotion();
             isPlayerHurt = true;
+            healthBar.width = healthBar.width - 50;
+            if (healthBar.width <= 100) {
+                healthBarImg.src = barRed;
+            } else if (healthBar.width <= 250) {
+                healthBarImg.src = barOrange;
+            }
             setTimeout(() => {
                 isPlayerHurt = false;
                 sprite.src = "./img/sprite/idle-right.png";
@@ -397,6 +435,9 @@ const getRectangleCollisions = () => {
                 (currentFish) => fish.position.x != currentFish.position.x
             );
             score += 50;
+            if (healthBar.width < 400) {
+                healthBar.width += 50;
+            }
         }
     });
 
@@ -428,7 +469,7 @@ const keys = {
 const animate = () => {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    healthBar.draw();
     // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
     fishes.forEach((fish) => fish.draw());
