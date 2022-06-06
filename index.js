@@ -48,7 +48,7 @@ const setBoarMotion = () => {
 const switchBoarMovement = () => {
     boarDirection = "right";
     setInterval(() => {
-        console.log(boarMovementTimer, boarDirection);
+        // console.log(boarMovementTimer, boarDirection);
         if (boarMovementTimer > 0) {
             if (boarDirection == "left") {
                 boarDirection = "right";
@@ -168,8 +168,9 @@ class Enemy {
         if (this.counter == 3) {
             this.counter = 0;
             this.frames++;
-
-            if (boarPNG.src.includes("boar-dead.png") && this.frames == 9) {
+            console.log(boarPNG.src);
+            if (boarPNG.src.includes("boar-dead.png")) {
+                this.velocity.x = 0;
                 // once sprite complete, remove boar after slight delay
                 setTimeout(() => {
                     enemies = enemies.filter((enemy) => {
@@ -191,10 +192,11 @@ class Enemy {
             this.counter++;
         }
 
-        if (boarDirection == "left") {
+        // check there is no boar to remove, to avoid issue with delay of settimeout for removing boar
+        if (boarDirection == "left" && !boarToRemove) {
             boarPNG.src = "./img/sprite/boar-walk-left.png";
             this.velocity.x = -2.5;
-        } else if (boarDirection == "right") {
+        } else if (boarDirection == "right" && !boarToRemove) {
             boarPNG.src = "./img/sprite/boar-walk-right.png";
             this.velocity.x = 2.5;
         }
@@ -335,19 +337,19 @@ const getRectangleCollisions = () => {
 
     enemies.forEach((enemy) => {
         // Added width offsets to cater to sprite's padding
-
         //jump on enemy
         if (
             player.position.y + player.height <= enemy.position.y &&
             player.position.y + player.height + player.velocity.y >=
                 enemy.position.y &&
             player.position.x + player.width - 60 >= enemy.position.x &&
-            player.position.x + 50 <= enemy.position.x + enemy.width
+            player.position.x + 50 <= enemy.position.x + enemy.width / 5
         ) {
             // set counter frames to 0 to avoid glitchy sprite
 
             // only bounce on initial boar jump
             if (!boarPNG.src.includes("boar-dead.png")) {
+                console.log("killed");
                 player.velocity.y = -15;
                 enemy.counter = 0;
                 enemy.frames = 0;
@@ -373,7 +375,6 @@ const getRectangleCollisions = () => {
             enemy.counter = 0;
             enemy.frames = 0;
             // }
-
             setBoarMotion();
             isPlayerHurt = true;
             setTimeout(() => {
