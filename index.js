@@ -393,7 +393,7 @@ const getRectangleCollisions = () => {
             // set counter frames to 0 to avoid glitchy sprite
 
             // only bounce on initial boar jump
-            if (!enemy.image.src.includes("boar-dead.png")) {
+            if (!enemy.image.src.includes("dead")) {
                 console.log("killed");
                 player.velocity.y = -15;
                 enemy.counter = 0;
