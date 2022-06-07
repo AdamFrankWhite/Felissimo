@@ -6,17 +6,9 @@ sprite.src = "./img/sprite/idle-right.png";
 
 let fishPNG = new Image();
 fishPNG.src = "./img/fish.png";
-
 let catnipPNG = new Image();
 catnipPNG.src = "./img/catnip.png";
-
 let boarPNG = "./img/sprite/boar-sleep.png";
-
-// let boarPNG = new Image();
-// boarPNG.src = "./img/sprite/boar-sleep.png";
-
-// let boarPNG2 = new Image();
-// boarPNG2.src = "./img/sprite/boar-sleep.png";
 let catnipBarImg = new Image();
 catnipBarImg.src = "./img/bar-blue.png";
 let healthBarImg = new Image();
@@ -24,7 +16,8 @@ let barGreen = "./img/bar-green.png";
 let barOrange = "./img/bar-orange.png";
 let barRed = "./img/bar-red.png";
 healthBarImg.src = barGreen;
-
+const platformTexture = new Image();
+platformTexture.src = "/img/stones-146304.svg";
 let score = 0;
 let catnipTimer = 0;
 const gravity = 1;
@@ -35,6 +28,39 @@ let boarMovementTimer = 0;
 let boarDirection;
 let jumpStrength = 1;
 let boarToRemove;
+
+// set width and height to viewport dimensions
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+// const platformTexture = new Image('./')
+const platformPositions = [
+    { x: 300, y: 500 },
+    { x: 700, y: 550 },
+    { x: 600, y: 350 },
+    { x: 800, y: 300 },
+    { x: 1000, y: 200 },
+    { x: 1200, y: 300 },
+    { x: 1500, y: 200 },
+    { x: 1700, y: 300 },
+    { x: 1900, y: 200 },
+    { x: 2150, y: 300 },
+    { x: 2400, y: 200 },
+];
+const fishPositions = [
+    { x: 0, y: 600 },
+    { x: 700, y: 600 },
+    { x: 600, y: 250 },
+    { x: 800, y: 500 },
+    { x: 1000, y: 300 },
+    { x: 1200, y: 400 },
+];
+
+const catnipPositions = [
+    { x: 0, y: 600 },
+    { x: 700, y: 200 },
+];
+
 const setCatnipTimer = () => {
     isHighOnCatnip = true;
     catnipTimer = 5;
@@ -225,14 +251,6 @@ class Enemy {
         this.draw();
     }
 }
-
-let enemies = [
-    new Enemy(500, 600, boarPNG, 1, false),
-    new Enemy(800, 600, boarPNG, 2, false),
-];
-const platformTexture = new Image();
-platformTexture.src = "/img/stones-146304.svg";
-
 // Health bar
 
 class ProgressBar {
@@ -259,9 +277,6 @@ class ProgressBar {
         );
     }
 }
-
-let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
-let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
 
 class Platform {
     constructor(x, y) {
@@ -318,44 +333,26 @@ class Item {
         );
     }
 }
+const keys = {
+    right: {
+        pressed: false,
+    },
+    left: {
+        pressed: false,
+    },
+};
 
-// set width and height to viewport dimensions
-
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-// const platformTexture = new Image('./')
-const platformPositions = [
-    { x: 300, y: 500 },
-    { x: 700, y: 550 },
-    { x: 600, y: 350 },
-    { x: 800, y: 300 },
-    { x: 1000, y: 200 },
-    { x: 1200, y: 300 },
-    { x: 1500, y: 200 },
-    { x: 1700, y: 300 },
-    { x: 1900, y: 200 },
-    { x: 2150, y: 300 },
-    { x: 2400, y: 200 },
+let enemies = [
+    new Enemy(500, 600, boarPNG, 1, false),
+    new Enemy(800, 600, boarPNG, 2, false),
 ];
+let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
+let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
 
-const player = new Player();
+let player = new Player();
 let platforms = platformPositions.map(
     (platform) => new Platform(platform.x, platform.y)
 );
-
-const fishPositions = [
-    { x: 0, y: 600 },
-    { x: 700, y: 600 },
-    { x: 600, y: 250 },
-    { x: 800, y: 500 },
-    { x: 1000, y: 300 },
-    { x: 1200, y: 400 },
-];
-
-const catnipPositions = [
-    { x: 0, y: 600 },
-    { x: 700, y: 200 },
-];
 
 let fishes = fishPositions.map(
     (item) => new Item(item.x, item.y, fishPNG, "fish")
@@ -364,6 +361,29 @@ let fishes = fishPositions.map(
 let catnip = catnipPositions.map(
     (item) => new Item(item.x, item.y, catnipPNG, "catnip")
 );
+
+function init() {
+    enemies = [
+        new Enemy(500, 600, boarPNG, 1, false),
+        new Enemy(800, 600, boarPNG, 2, false),
+    ];
+    healthBarImg.src = barGreen;
+    healthBar = new ProgressBar(50, 50, 400, healthBarImg);
+    catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
+
+    player = new Player();
+    platforms = platformPositions.map(
+        (platform) => new Platform(platform.x, platform.y)
+    );
+
+    fishes = fishPositions.map(
+        (item) => new Item(item.x, item.y, fishPNG, "fish")
+    );
+
+    catnip = catnipPositions.map(
+        (item) => new Item(item.x, item.y, catnipPNG, "catnip")
+    );
+}
 
 const getRectangleCollisions = () => {
     platforms.forEach((platform) => {
@@ -429,7 +449,18 @@ const getRectangleCollisions = () => {
             enemy.setBoarMotion();
             isPlayerHurt = true;
             healthBar.width = healthBar.width - 50;
-            if (healthBar.width <= 100) {
+            if (healthBar.width == 0) {
+                let num = 1;
+                setInterval(() => {
+                    num -= 0.01;
+                    canvas.style.filter = `brightness(${num})`;
+                    console.log(canvas.style.filter);
+                }, 20);
+                setTimeout(() => {
+                    init();
+                    canvas.style.filter = "saturate(3.5)";
+                }, 2000);
+            } else if (healthBar.width <= 100) {
                 healthBarImg.src = barRed;
             } else if (healthBar.width <= 250) {
                 healthBarImg.src = barOrange;
@@ -485,14 +516,6 @@ const getRectangleCollisions = () => {
             setCatnipTimer();
         }
     });
-};
-const keys = {
-    right: {
-        pressed: false,
-    },
-    left: {
-        pressed: false,
-    },
 };
 
 const animate = () => {
