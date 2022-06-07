@@ -47,33 +47,6 @@ const doTimer = () => {
     }, 25);
 };
 
-const setBoarMotion = () => {
-    boarMovementTimer = 2;
-    switchBoarMovement();
-};
-
-const switchBoarMovement = () => {
-    boarDirection = "right";
-    setInterval(() => {
-        // console.log(boarMovementTimer, boarDirection);
-        if (boarMovementTimer > 0) {
-            if (boarDirection == "left") {
-                boarDirection = "right";
-            } else if (boarDirection == "right") {
-                boarDirection = "left";
-            }
-            boarMovementTimer--;
-        } else {
-            if (boarDirection == "left") {
-                boarDirection = "right";
-            } else if (boarDirection == "right") {
-                boarDirection = "left";
-            }
-            boarMovementTimer = 2;
-        }
-    }, 2000);
-};
-
 class Player {
     constructor() {
         this.position = {
@@ -155,7 +128,36 @@ class Enemy {
         this.counter = 0;
         this.image = image;
         this.moving = moving;
+        this.boarMovementTimer;
+        this.boarDirection;
     }
+
+    setBoarMotion = () => {
+        this.boarMovementTimer = 2;
+        this.switchBoarMovement();
+    };
+
+    switchBoarMovement = () => {
+        this.boarDirection = "right";
+        setInterval(() => {
+            // console.log(boarMovementTimer, boarDirection);
+            if (this.boarMovementTimer > 0) {
+                if (this.boarDirection == "left") {
+                    this.boarDirection = "right";
+                } else if (boarDirection == "right") {
+                    this.boarDirection = "left";
+                }
+                this.boarMovementTimer--;
+            } else {
+                if (this.boarDirection == "left") {
+                    this.boarDirection = "right";
+                } else if (this.boarDirection == "right") {
+                    this.boarDirection = "left";
+                }
+                this.boarMovementTimer = 2;
+            }
+        }, 2000);
+    };
     draw() {
         ctx.drawImage(
             this.image,
@@ -201,10 +203,10 @@ class Enemy {
         }
 
         // check there is no boar to remove, to avoid issue with delay of settimeout for removing boar
-        if (boarDirection == "left" && !boarToRemove) {
+        if (this.boarDirection == "left" && !boarToRemove) {
             boarPNG.src = "./img/sprite/boar-walk-left.png";
             this.velocity.x = -2.5;
-        } else if (boarDirection == "right" && !boarToRemove) {
+        } else if (this.boarDirection == "right" && !boarToRemove) {
             boarPNG.src = "./img/sprite/boar-walk-right.png";
             this.velocity.x = 2.5;
         }
@@ -223,7 +225,10 @@ class Enemy {
     }
 }
 
-let enemies = [new Enemy(500, 600, boarPNG, 1, false)];
+let enemies = [
+    new Enemy(500, 600, boarPNG, 1, false),
+    new Enemy(800, 600, boarPNG, 2, false),
+];
 const platformTexture = new Image();
 platformTexture.src = "/img/stones-146304.svg";
 
@@ -416,7 +421,7 @@ const getRectangleCollisions = () => {
             enemy.counter = 0;
             enemy.frames = 0;
             // }
-            setBoarMotion();
+            enemy.setBoarMotion();
             isPlayerHurt = true;
             healthBar.width = healthBar.width - 50;
             if (healthBar.width <= 100) {
