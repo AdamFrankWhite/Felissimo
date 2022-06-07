@@ -151,7 +151,7 @@ class Enemy {
             if (this.boarMovementTimer > 0) {
                 if (this.boarDirection == "left") {
                     this.boarDirection = "right";
-                } else if (boarDirection == "right") {
+                } else if (this.boarDirection == "right") {
                     this.boarDirection = "left";
                 }
                 this.boarMovementTimer--;
@@ -184,7 +184,7 @@ class Enemy {
         if (this.counter == 3) {
             this.counter = 0;
             this.frames++;
-            if (this.image.src.includes("boar-dead.png")) {
+            if (this.image.src.includes("dead")) {
                 this.velocity.x = 0;
                 // once sprite complete, remove boar after slight delay
                 setTimeout(() => {
@@ -193,17 +193,9 @@ class Enemy {
                         return enemy.id != boarToRemove.id;
                     });
                     boarToRemove = "";
-                }, 500);
+                }, 1000);
 
                 // this.frames = 0;
-            } else if (
-                this.image.src.includes("boar-jump") &&
-                this.frames == 6
-            ) {
-                // once sprite complete, remove boar after slight delay
-                setTimeout(() => {
-                    this.image.src = "./img/sprite/boar-sleep.png";
-                }, 2000);
             } else if (this.frames == 17) {
                 this.frames = 0;
             }
@@ -408,8 +400,12 @@ const getRectangleCollisions = () => {
                 enemy.frames = 0;
                 boarToRemove = enemy;
             }
+            if (enemy.boarDirection == "left") {
+                enemy.image.src = "./img/sprite/boar-dead-left.png";
+            } else {
+                enemy.image.src = "./img/sprite/boar-dead-right.png";
+            }
 
-            enemy.image.src = "./img/sprite/boar-dead.png";
             // boarToRemove = "";
         }
 
