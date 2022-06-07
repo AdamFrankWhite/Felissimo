@@ -184,6 +184,7 @@ class Enemy {
                         console.log(enemy, boarToRemove);
                         return enemy.id != boarToRemove.id;
                     });
+                    boarToRemove = "";
                 }, 500);
 
                 // this.frames = 0;
@@ -395,10 +396,12 @@ const getRectangleCollisions = () => {
             }
 
             boarPNG.src = "./img/sprite/boar-dead.png";
+            // boarToRemove = "";
         }
 
         // touch enemy
         else if (
+            !boarToRemove &&
             player.position.y <= enemy.position.y &&
             player.position.y + player.height + player.velocity.y >=
                 enemy.position.y &&
