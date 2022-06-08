@@ -210,7 +210,7 @@ class Enemy {
         if (this.counter == 3) {
             this.counter = 0;
             this.frames++;
-            if (this.image.src.includes("dead")) {
+            if (this.image.src.includes("boar-dead")) {
                 this.velocity.x = 0;
                 // once sprite complete, remove boar after slight delay
                 setTimeout(() => {
@@ -413,7 +413,7 @@ const getRectangleCollisions = () => {
             // set counter frames to 0 to avoid glitchy sprite
 
             // only bounce on initial boar jump
-            if (!enemy.image.src.includes("dead")) {
+            if (!enemy.image.src.includes("boar-dead")) {
                 console.log("killed");
                 player.velocity.y = -15;
                 enemy.counter = 0;
@@ -449,7 +449,10 @@ const getRectangleCollisions = () => {
             enemy.setBoarMotion();
             isPlayerHurt = true;
             healthBar.width = healthBar.width - 50;
+            console.log(healthBar.width);
             if (healthBar.width == 0) {
+                // player.velocity.x = 0;
+                // sprite.src = "./img/sprite/dead.png";
                 let num = 1;
                 setInterval(() => {
                     num -= 0.01;
