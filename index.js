@@ -25,10 +25,10 @@ const gravity = 1;
 let isJumping = false;
 let isHighOnCatnip = false;
 let isPlayerHurt = false;
-let boarMovementTimer = 0;
-let boarDirection;
+let enemyMovementTimer = 0;
+let enemyDirection;
 let jumpStrength = 1;
-let boarToRemove;
+let enemyToRemove;
 
 // set width and height to viewport dimensions
 
@@ -106,7 +106,7 @@ class Player {
                 : sprite.width / 8,
             sprite.height,
             this.position.x,
-            this.position.y,
+            this.position.y + 10,
             this.width,
             this.height
         );
@@ -144,7 +144,7 @@ class Player {
 }
 
 class Enemy {
-    constructor(x, y, imageURL, imgWidth, imgHeight, id, moving) {
+    constructor(x, y, imageURL, imgWidth, imgHeight, id, enemyType, moving) {
         this.id = id;
         this.position = {
             x,
@@ -162,33 +162,34 @@ class Enemy {
         this.image = new Image();
         this.image.src = imageURL;
         this.moving = moving;
-        this.boarMovementTimer;
-        this.boarDirection;
+        this.enemyMovementTimer;
+        this.enemyDirection;
+        this.enemyType = enemyType;
     }
 
-    setBoarMotion = () => {
-        this.boarMovementTimer = 2;
-        this.switchBoarMovement();
+    setEnemyMotion = () => {
+        this.enemyMovementTimer = 2;
+        this.switchEnemyMovement();
     };
 
-    switchBoarMovement = () => {
-        this.boarDirection = "right";
+    switchEnemyMovement = () => {
+        this.enemyDirection = "right";
         setInterval(() => {
-            // console.log(boarMovementTimer, boarDirection);
-            if (this.boarMovementTimer > 0) {
-                if (this.boarDirection == "left") {
-                    this.boarDirection = "right";
-                } else if (this.boarDirection == "right") {
-                    this.boarDirection = "left";
+            // console.log(enemyMovementTimer, enemyDirection);
+            if (this.enemyMovementTimer > 0) {
+                if (this.enemyDirection == "left") {
+                    this.enemyDirection = "right";
+                } else if (this.enemyDirection == "right") {
+                    this.enemyDirection = "left";
                 }
-                this.boarMovementTimer--;
+                this.enemyMovementTimer--;
             } else {
-                if (this.boarDirection == "left") {
-                    this.boarDirection = "right";
-                } else if (this.boarDirection == "right") {
-                    this.boarDirection = "left";
+                if (this.enemyDirection == "left") {
+                    this.enemyDirection = "right";
+                } else if (this.enemyDirection == "right") {
+                    this.enemyDirection = "left";
                 }
-                this.boarMovementTimer = 2;
+                this.enemyMovementTimer = 2;
             }
         }, 2000);
     };
@@ -200,7 +201,7 @@ class Enemy {
             this.width,
             this.height,
             this.position.x,
-            this.position.y,
+            this.position.y + 15,
             this.width / 5,
             this.height / 5
         );
@@ -211,18 +212,20 @@ class Enemy {
         if (this.counter == 3) {
             this.counter = 0;
             this.frames++;
-            if (this.image.src.includes("boar-dead")) {
+            if (this.image.src.includes("dead")) {
                 this.velocity.x = 0;
                 // once sprite complete, remove boar after slight delay
                 setTimeout(() => {
                     enemies = enemies.filter((enemy) => {
-                        console.log(enemy, boarToRemove);
-                        return enemy.id != boarToRemove.id;
+                        console.log(enemy, enemyToRemove);
+                        return enemy.id != enemyToRemove.id;
                     });
-                    boarToRemove = "";
+                    enemyToRemove = "";
                 }, 1000);
 
                 // this.frames = 0;
+            } else if (this.enemyType == "monkey" && this.frames == 13) {
+                this.frames = 0;
             } else if (this.frames == 17) {
                 this.frames = 0;
             }
@@ -231,11 +234,11 @@ class Enemy {
         }
 
         // check there is no boar to remove, to avoid issue with delay of settimeout for removing boar
-        if (this.boarDirection == "left" && !boarToRemove) {
-            this.image.src = "./img/sprite/boar-walk-left.png";
+        if (this.enemyDirection == "left" && !enemyToRemove) {
+            this.image.src = `./img/sprite/${this.enemyType}-walk-left.png`;
             this.velocity.x = -2.5;
-        } else if (this.boarDirection == "right" && !boarToRemove) {
-            this.image.src = "./img/sprite/boar-walk-right.png";
+        } else if (this.enemyDirection == "right" && !enemyToRemove) {
+            this.image.src = `./img/sprite/${this.enemyType}-walk-right.png`;
             this.velocity.x = 2.5;
         }
 
@@ -343,9 +346,9 @@ const keys = {
 };
 
 let enemies = [
-    new Enemy(300, 0, boarPNG, 720, 512, 1, false),
-    new Enemy(1000, 550, boarPNG, 720, 512, 2, false),
-    new Enemy(700, 550, monkeyPNG, 640, 600, 3, false),
+    new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
+    new Enemy(1000, 550, boarPNG, 720, 512, 2, "boar", false),
+    new Enemy(700, 535, monkeyPNG, 640, 600, 3, "monkey", false),
 ];
 let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
 let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
@@ -428,25 +431,25 @@ const getRectangleCollisions = () => {
             // set counter frames to 0 to avoid glitchy sprite
 
             // only bounce on initial boar jump
-            if (!enemy.image.src.includes("boar-dead")) {
+            if (!enemy.image.src.includes(`${enemy.enemyType}-dead`)) {
                 console.log("killed");
                 player.velocity.y = -15;
                 enemy.counter = 0;
                 enemy.frames = 0;
-                boarToRemove = enemy;
+                enemyToRemove = enemy;
             }
-            if (enemy.boarDirection == "left") {
-                enemy.image.src = "./img/sprite/boar-dead-left.png";
+            if (enemy.enemyDirection == "left") {
+                enemy.image.src = `./img/sprite/${enemy.enemyType}-dead-left.png`;
             } else {
-                enemy.image.src = "./img/sprite/boar-dead-right.png";
+                enemy.image.src = `./img/sprite/${enemy.enemyType}-dead-right.png`;
             }
 
-            // boarToRemove = "";
+            // enemyToRemove = "";
         }
 
         // touch enemy
         else if (
-            !boarToRemove &&
+            !enemyToRemove &&
             player.position.y <= enemy.position.y &&
             player.position.y + player.height + player.velocity.y >=
                 enemy.position.y &&
@@ -461,7 +464,7 @@ const getRectangleCollisions = () => {
             enemy.counter = 0;
             enemy.frames = 0;
             // }
-            enemy.setBoarMotion();
+            enemy.setEnemyMotion();
             isPlayerHurt = true;
             healthBar.width = healthBar.width - 50;
             console.log(healthBar.width);
