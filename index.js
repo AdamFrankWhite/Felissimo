@@ -72,21 +72,21 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 // const platformTexture = new Image('./')
 let platformPositions = [
-    { x: -50, y: 650, image: platformTexture },
-    { x: 150, y: 650, image: platformTexture },
-    { x: 350, y: 650, image: platformTexture },
-    { x: 550, y: 650, image: platformTexture },
-    { x: 750, y: 650, image: platformTexture },
-    { x: 950, y: 650, image: platformTexture },
-    { x: 1150, y: 650, image: platformTexture },
-    { x: 1350, y: 650, image: platformTexture },
-    { x: 1550, y: 650, image: platformTexture },
-    { x: 1200, y: 500, image: platformTexture },
-    { x: 1000, y: 300, image: platformTexture },
-    { x: 700, y: 200, image: platformTexture },
-    { x: 500, y: 200, image: platformTexture },
-    { x: 300, y: 200, image: platformTexture },
-    { x: 100, y: 200, image: platformTexture },
+    [-50, 650, platformTexture],
+    [150, 650, platformTexture],
+    [350, 650, platformTexture],
+    [550, 650, platformTexture],
+    [750, 650, platformTexture],
+    [950, 650, platformTexture],
+    [1150, 650, platformTexture],
+    [1350, 650, platformTexture],
+    [1550, 650, platformTexture],
+    [1200, 500, platformTexture],
+    [1000, 300, platformTexture],
+    [700, 200, platformTexture],
+    [500, 200, platformTexture],
+    [300, 200, platformTexture],
+    [100, 200, platformTexture],
 ];
 let fishPositions = [
     { x: 600, y: 150 },
@@ -397,7 +397,7 @@ let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
 
 let player = new Player();
 let platforms = platformPositions.map(
-    (platform) => new Platform(platform.x, platform.y, platform.image)
+    (platform) => new Platform(platform[0], platform[1], platform[2])
 );
 
 let fishes = fishPositions.map(
@@ -432,7 +432,7 @@ function init() {
 
     player = new Player();
     platforms = platformPositions.map(
-        (platform) => new Platform(platform.x, platform.y)
+        (platform) => new Platform(platform[0], platform[1], platform[2])
     );
 
     fishes = fishPositions.map(
