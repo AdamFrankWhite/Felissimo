@@ -1,6 +1,42 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+// Preload images to avoid blank frames when initially loading sprite for changing direction, etc
+var images = [];
+function preload(imageData) {
+    imageData.forEach((imgPath) => {
+        let x = new Image();
+        x.src = imgPath;
+        images.push(x);
+    });
+}
+
+console.log(images);
+//-- usage --//
+preload([
+    "img/sprite/boar-dead-left.png",
+    "img/sprite/boar-dead-right.png",
+    "img/sprite/boar-jump-right.png",
+    "img/sprite/boar-sleep.png",
+    "img/sprite/boar-walk-left.png",
+    "img/sprite/boar-walk-right.png",
+    "img/sprite/dead.png",
+    "img/sprite/fall.png",
+    "img/sprite/hurt.png",
+    "img/sprite/idle-left.png",
+    "img/sprite/idle-right.png",
+    "img/sprite/jump.png",
+    "img/sprite/monkey-dead-left.png",
+    "img/sprite/monkey-dead-right.png",
+    "img/sprite/monkey-idle.png",
+    "img/sprite/monkey-walk-left.png",
+    "img/sprite/monkey-walk-right.png",
+    "img/sprite/run.png",
+    "img/sprite/slide-left.png",
+    "img/sprite/slide-right.png",
+    "img/sprite/walk-left.png",
+    "img/sprite/walk-right.png",
+]);
 let sprite = new Image();
 sprite.src = "./img/sprite/idle-right.png";
 
