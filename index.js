@@ -71,7 +71,7 @@ let enemyToRemove;
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 // const platformTexture = new Image('./')
-const platformPositions = [
+let platformPositions = [
     { x: -50, y: 650, image: platformTexture },
     { x: 150, y: 650, image: platformTexture },
     { x: 350, y: 650, image: platformTexture },
@@ -88,12 +88,12 @@ const platformPositions = [
     { x: 300, y: 200, image: platformTexture },
     { x: 100, y: 200, image: platformTexture },
 ];
-const fishPositions = [
+let fishPositions = [
     { x: 600, y: 150 },
     { x: 1100, y: 200 },
 ];
 
-const catnipPositions = [
+let catnipPositions = [
     { x: 0, y: 600 },
     { x: 700, y: 200 },
 ];
@@ -149,6 +149,13 @@ class Player {
     }
 
     update() {
+        console.log(player.position.x);
+        // die if fall off screen
+        if (player.position.y > innerHeight) {
+            // console.log(player.position.y);
+            // restartLevel();
+        }
+
         if (isPlayerHurt) sprite.src = "./img/sprite/hurt.png";
         // slow down animation by 3
         if (this.counter == 3) {
@@ -166,15 +173,14 @@ class Player {
 
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
-        if (this.position.y + this.height + this.velocity.y < canvas.height) {
-            this.velocity.y += gravity;
-        } else {
-            this.velocity.y = 0;
-            isJumping = false;
-        }
-        // if (!isFalling && !isJumping) {
-        //     sprite.src = "./img/sprite/idle-right.png";
+        // if (this.position.y + this.height + this.velocity.y < canvas.height) {
+        this.velocity.y += gravity;
         // }
+        // else {
+        //     this.velocity.y = 0;
+        //     isJumping = false;
+        // }
+
         this.draw();
     }
 }
@@ -402,11 +408,23 @@ let catnip = catnipPositions.map(
     (item) => new Item(item.x, item.y, catnipPNG, "catnip")
 );
 
+function restartLevel() {
+    let num = 1;
+    setInterval(() => {
+        num -= 0.01;
+        canvas.style.filter = `brightness(${num})`;
+    }, 20);
+    setTimeout(() => {
+        canvas.style.filter = "saturate(3.5)";
+        init();
+    }, 2000);
+}
+
 function init() {
     enemies = [
-        new Enemy(300, 0, boarPNG, 720, 512, 1, false),
-        new Enemy(1000, 550, boarPNG, 720, 512, 2, false),
-        new Enemy(700, 550, monkeyPNG, 640, 600, 3, false),
+        new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
+        new Enemy(1000, 550, boarPNG, 720, 512, 2, "boar", false),
+        new Enemy(700, 535, monkeyPNG, 640, 600, 3, "monkey", false),
     ];
     healthBarImg.src = barGreen;
     healthBar = new ProgressBar(50, 50, 400, healthBarImg);
@@ -507,16 +525,7 @@ const getRectangleCollisions = () => {
             if (healthBar.width == 0) {
                 // player.velocity.x = 0;
                 // sprite.src = "./img/sprite/dead.png";
-                let num = 1;
-                setInterval(() => {
-                    num -= 0.01;
-                    canvas.style.filter = `brightness(${num})`;
-                    console.log(canvas.style.filter);
-                }, 20);
-                setTimeout(() => {
-                    init();
-                    canvas.style.filter = "saturate(3.5)";
-                }, 2000);
+                restartLevel();
             } else if (healthBar.width <= 100) {
                 healthBarImg.src = barRed;
             } else if (healthBar.width <= 250) {
