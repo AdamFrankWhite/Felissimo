@@ -9,6 +9,7 @@ fishPNG.src = "./img/fish.png";
 let catnipPNG = new Image();
 catnipPNG.src = "./img/catnip.png";
 let boarPNG = "./img/sprite/boar-sleep.png";
+let monkeyPNG = "./img/sprite/monkey-idle.png";
 let catnipBarImg = new Image();
 catnipBarImg.src = "./img/bar-blue.png";
 let healthBarImg = new Image();
@@ -143,14 +144,14 @@ class Player {
 }
 
 class Enemy {
-    constructor(x, y, imageURL, id, moving) {
+    constructor(x, y, imageURL, imgWidth, imgHeight, id, moving) {
         this.id = id;
         this.position = {
             x,
             y,
         };
-        this.width = 720;
-        this.height = 512;
+        this.width = imgWidth;
+        this.height = imgHeight;
         this.velocity = {
             x: 0,
             y: 0,
@@ -342,8 +343,9 @@ const keys = {
 };
 
 let enemies = [
-    new Enemy(300, 0, boarPNG, 1, false),
-    new Enemy(800, 550, boarPNG, 2, false),
+    new Enemy(300, 0, boarPNG, 720, 512, 1, false),
+    new Enemy(1000, 550, boarPNG, 720, 512, 2, false),
+    new Enemy(700, 550, monkeyPNG, 640, 600, 3, false),
 ];
 let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
 let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
@@ -363,8 +365,9 @@ let catnip = catnipPositions.map(
 
 function init() {
     enemies = [
-        new Enemy(500, 500, boarPNG, 1, false),
-        new Enemy(800, 500, boarPNG, 2, false),
+        new Enemy(300, 0, boarPNG, 720, 512, 1, false),
+        new Enemy(1000, 550, boarPNG, 720, 512, 2, false),
+        new Enemy(700, 550, monkeyPNG, 640, 600, 3, false),
     ];
     healthBarImg.src = barGreen;
     healthBar = new ProgressBar(50, 50, 400, healthBarImg);
