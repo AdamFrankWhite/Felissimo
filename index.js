@@ -17,7 +17,7 @@ let barOrange = "./img/bar-orange.png";
 let barRed = "./img/bar-red.png";
 healthBarImg.src = barGreen;
 const platformTexture = new Image();
-platformTexture.src = "/img/stones-146304.svg";
+platformTexture.src = "./img/platform.png";
 let score = 0;
 let catnipTimer = 0;
 const gravity = 1;
@@ -35,25 +35,25 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 // const platformTexture = new Image('./')
 const platformPositions = [
-    { x: 300, y: 500 },
-    { x: 700, y: 550 },
-    { x: 600, y: 350 },
-    { x: 800, y: 300 },
-    { x: 1000, y: 200 },
-    { x: 1200, y: 300 },
-    { x: 1500, y: 200 },
-    { x: 1700, y: 300 },
-    { x: 1900, y: 200 },
-    { x: 2150, y: 300 },
-    { x: 2400, y: 200 },
+    { x: -50, y: 650, image: platformTexture },
+    { x: 150, y: 650, image: platformTexture },
+    { x: 350, y: 650, image: platformTexture },
+    { x: 550, y: 650, image: platformTexture },
+    { x: 750, y: 650, image: platformTexture },
+    { x: 950, y: 650, image: platformTexture },
+    { x: 1150, y: 650, image: platformTexture },
+    { x: 1350, y: 650, image: platformTexture },
+    { x: 1550, y: 650, image: platformTexture },
+    { x: 1200, y: 500, image: platformTexture },
+    { x: 1000, y: 300, image: platformTexture },
+    { x: 700, y: 200, image: platformTexture },
+    { x: 500, y: 200, image: platformTexture },
+    { x: 300, y: 200, image: platformTexture },
+    { x: 100, y: 200, image: platformTexture },
 ];
 const fishPositions = [
-    { x: 0, y: 600 },
-    { x: 700, y: 600 },
-    { x: 600, y: 250 },
-    { x: 800, y: 500 },
-    { x: 1000, y: 300 },
-    { x: 1200, y: 400 },
+    { x: 600, y: 150 },
+    { x: 1100, y: 200 },
 ];
 
 const catnipPositions = [
@@ -82,7 +82,7 @@ class Player {
     constructor() {
         this.position = {
             x: 300,
-            y: 100,
+            y: 300,
         };
         this.width = 136;
         this.height = sprite.height / 4;
@@ -245,9 +245,7 @@ class Enemy {
         } else {
             this.velocity.y = 0;
         }
-        // if (!isFalling && !isJumping) {
-        //     sprite.src = "./img/sprite/idle-right.png";
-        // }
+
         this.draw();
     }
 }
@@ -279,23 +277,24 @@ class ProgressBar {
 }
 
 class Platform {
-    constructor(x, y) {
+    constructor(x, y, image) {
         this.position = {
             x,
             y,
         };
-        this.width = 175;
-        this.height = 20;
+        this.width = image.width;
+        this.height = image.height * 1.5;
+        this.image = image;
     }
     draw() {
         // ctx.fillStyle = "blue";
         // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
         ctx.drawImage(
-            platformTexture,
+            this.image,
             0,
             0,
-            this.width * 4,
-            this.height * 4,
+            this.width,
+            this.height,
             this.position.x,
             this.position.y,
             this.width,
@@ -343,15 +342,15 @@ const keys = {
 };
 
 let enemies = [
-    new Enemy(500, 600, boarPNG, 1, false),
-    new Enemy(800, 600, boarPNG, 2, false),
+    new Enemy(300, 0, boarPNG, 1, false),
+    new Enemy(800, 550, boarPNG, 2, false),
 ];
 let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
 let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
 
 let player = new Player();
 let platforms = platformPositions.map(
-    (platform) => new Platform(platform.x, platform.y)
+    (platform) => new Platform(platform.x, platform.y, platform.image)
 );
 
 let fishes = fishPositions.map(
@@ -364,8 +363,8 @@ let catnip = catnipPositions.map(
 
 function init() {
     enemies = [
-        new Enemy(500, 600, boarPNG, 1, false),
-        new Enemy(800, 600, boarPNG, 2, false),
+        new Enemy(500, 500, boarPNG, 1, false),
+        new Enemy(800, 500, boarPNG, 2, false),
     ];
     healthBarImg.src = barGreen;
     healthBar = new ProgressBar(50, 50, 400, healthBarImg);
@@ -398,6 +397,19 @@ const getRectangleCollisions = () => {
             player.velocity.y = 0;
             isJumping = false;
         }
+
+        // enemies collision with platforms
+        enemies.forEach((enemy) => {
+            if (
+                enemy.position.y + enemy.height <= platform.position.y &&
+                enemy.position.y + enemy.height + 35 + enemy.velocity.y >=
+                    platform.position.y &&
+                enemy.position.x + enemy.width >= platform.position.x &&
+                enemy.position.x <= platform.position.x + platform.width
+            ) {
+                enemy.velocity.y = 0;
+            }
+        });
     });
 
     enemies.forEach((enemy) => {
