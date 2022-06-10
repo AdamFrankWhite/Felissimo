@@ -60,6 +60,7 @@ let catnipTimer = 0;
 const gravity = 1;
 let isJumping = false;
 let isHighOnCatnip = false;
+
 let isPlayerHurt = false;
 let enemyMovementTimer = 0;
 let enemyDirection;
@@ -88,6 +89,14 @@ let platformPositions = [
     { x: 500, y: 200, image: platformTexture },
     { x: 300, y: 200, image: platformTexture },
     { x: 100, y: 200, image: platformTexture },
+    { x: 900, y: 0, image: platformTexture },
+    { x: 800, y: -100, image: platformTexture },
+    { x: 1000, y: -100, image: platformTexture },
+    { x: 1200, y: -100, image: platformTexture },
+    { x: 1400, y: -100, image: platformTexture },
+    { x: 1100, y: -300, image: platformTexture },
+    { x: 1200, y: -400, image: platformTexture },
+    { x: 1400, y: -400, image: platformTexture },
 ];
 let fishPositions = [
     { x: 600, y: 150 },
@@ -175,7 +184,11 @@ class Player {
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
         // if (this.position.y + this.height + this.velocity.y < canvas.height) {
+
         this.velocity.y += gravity;
+        if (this.position.y + this.height > innerWidth - 50) {
+            this.velocity.y = 0;
+        }
         // }
         // else {
         //     this.velocity.y = 0;
@@ -252,7 +265,7 @@ class Enemy {
 
     update() {
         // slow down animation by 3
-        if (this.counter == 3) {
+        if (this.counter == 2) {
             this.counter = 0;
             this.frames++;
             if (this.image.src.includes("dead")) {
@@ -588,13 +601,65 @@ const getRectangleCollisions = () => {
 const animate = () => {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    healthBar.draw();
+
     catnipBar.draw();
     // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
     fishes.forEach((fish) => fish.draw());
     catnip.forEach((leaf) => leaf.draw());
     enemies.forEach((enemy) => enemy.update());
+    console.log(player.position.y, player.velocity.y);
+    if (player.position.y < 200) {
+        player.position.y += 4;
+        platforms = platforms.map((platform) => {
+            platform.position.y += 4;
+
+            return platform;
+        });
+        enemies = enemies.map((enemy) => {
+            enemy.position.y += 4;
+
+            return enemy;
+        });
+        fishes = fishes.map((fish) => {
+            fish.position.y += 4;
+
+            return fish;
+        });
+        catnip = catnip.map((leaf) => {
+            leaf.position.y += 4;
+
+            return leaf;
+        });
+    } else if (
+        player.position.y > innerHeight - 300 &&
+        player.position.y + player.height < innerHeight
+    ) {
+        console.log(player.position.y, player.velocity.y);
+        // must minus player y pos too else won't collide with surfaces and falls through everything
+        player.position.y -= 4;
+        platforms = platforms.map((platform) => {
+            platform.position.y -= 4;
+
+            return platform;
+        });
+        enemies = enemies.map((enemy) => {
+            enemy.position.y -= 4;
+
+            return enemy;
+        });
+        fishes = fishes.map((fish) => {
+            fish.position.y -= 4;
+
+            return fish;
+        });
+        catnip = catnip.map((leaf) => {
+            leaf.position.y -= 4;
+
+            return leaf;
+        });
+    }
+
     if (isPlayerHurt) {
         player.velocity.x = -5;
     } else if (keys.right.pressed && player.position.x < 750) {
@@ -683,7 +748,7 @@ const animate = () => {
             });
         }
     }
-
+    healthBar.draw();
     player.update();
     getRectangleCollisions(platforms);
 };
