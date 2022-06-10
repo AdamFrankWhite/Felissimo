@@ -206,8 +206,8 @@ class Enemy {
             x,
             y,
         };
-        this.width = imgWidth;
-        this.height = imgHeight;
+        this.width = imgWidth / 5;
+        this.height = imgHeight / 5;
         this.velocity = {
             x: 0,
             y: 0,
@@ -253,14 +253,14 @@ class Enemy {
     draw() {
         ctx.drawImage(
             this.image,
-            this.width * this.frames,
+            this.width * 5 * this.frames,
             0,
-            this.width,
-            this.height,
+            this.width * 5,
+            this.height * 5,
             this.position.x,
             this.position.y + 15,
-            this.width / 5,
-            this.height / 5
+            this.width,
+            this.height
         );
     }
 
@@ -302,7 +302,7 @@ class Enemy {
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
         this.velocity.y += gravity;
-        if (this.position.y + this.height / 5 > innerHeight - 50) {
+        if (this.position.y + this.height > innerHeight - 50) {
             this.velocity.y = 0;
         }
 
@@ -475,11 +475,10 @@ const getRectangleCollisions = () => {
         // enemies collision with platforms
         enemies.forEach((enemy) => {
             if (
-                enemy.position.y + enemy.height / 5 <= platform.position.y &&
-                enemy.position.y + enemy.height / 5 + enemy.velocity.y >=
+                enemy.position.y + enemy.height <= platform.position.y &&
+                enemy.position.y + enemy.height + enemy.velocity.y >=
                     platform.position.y &&
-                enemy.position.x + enemy.width / 5 - 50 >=
-                    platform.position.x &&
+                enemy.position.x + enemy.width - 50 >= platform.position.x &&
                 enemy.position.x + 50 <= platform.position.x + platform.width
             ) {
                 enemy.velocity.y = 0;
@@ -495,7 +494,7 @@ const getRectangleCollisions = () => {
             player.position.y + player.height + player.velocity.y >=
                 enemy.position.y &&
             player.position.x + player.width - 60 >= enemy.position.x &&
-            player.position.x + 50 <= enemy.position.x + enemy.width / 5
+            player.position.x + 50 <= enemy.position.x + enemy.width
         ) {
             // set counter frames to 0 to avoid glitchy sprite
 
@@ -523,7 +522,7 @@ const getRectangleCollisions = () => {
             player.position.y + player.height + player.velocity.y >=
                 enemy.position.y &&
             player.position.x + player.width - 60 >= enemy.position.x &&
-            player.position.x + 40 <= enemy.position.x + enemy.width / 5
+            player.position.x + 40 <= enemy.position.x + enemy.width
         ) {
             // set counter frames to 0 to avoid glitchy sprite
 
