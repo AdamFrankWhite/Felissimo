@@ -66,7 +66,7 @@ let enemyMovementTimer = 0;
 let enemyDirection;
 let jumpStrength = 1;
 let enemyToRemove;
-
+let playerDirection = "";
 // set width and height to viewport dimensions
 
 canvas.width = innerWidth;
@@ -534,6 +534,7 @@ const getRectangleCollisions = () => {
             // }
             enemy.setEnemyMotion();
             isPlayerHurt = true;
+
             healthBar.width = healthBar.width - 50;
             console.log(healthBar.width);
             if (healthBar.width == 0) {
@@ -661,7 +662,7 @@ const animate = () => {
     }
 
     if (isPlayerHurt) {
-        player.velocity.x = -5;
+        player.velocity.x = playerDirection == "left" ? 5 : -5;
     } else if (keys.right.pressed && player.position.x < 750) {
         if (isHighOnCatnip) {
             player.velocity.x = 20;
@@ -760,7 +761,7 @@ addEventListener("keydown", ({ key }) => {
         case "a":
             sprite.src = "./img/sprite/walk-left.png";
             keys.left.pressed = true;
-
+            playerDirection = "left";
             break;
         case "s":
             if (keys.left.pressed) {
@@ -773,7 +774,7 @@ addEventListener("keydown", ({ key }) => {
         case "d":
             sprite.src = "./img/sprite/walk-right.png";
             keys.right.pressed = true;
-
+            playerDirection = "right";
             break;
         case "w":
             // simply checking velocity y == 0 doesn't work as it can be greater due to gravity creating jumping bugginess
