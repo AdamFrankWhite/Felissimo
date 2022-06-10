@@ -632,29 +632,29 @@ const animate = () => {
             return leaf;
         });
     } else if (
-        player.position.y > innerHeight - 300 &&
-        player.position.y + player.height < innerHeight
+        player.position.y > innerHeight - 200 &&
+        player.position.y - player.height < innerHeight
     ) {
         console.log(player.position.y, player.velocity.y);
         // must minus player y pos too else won't collide with surfaces and falls through everything
-        player.position.y -= 4;
+        player.position.y -= 12;
         platforms = platforms.map((platform) => {
-            platform.position.y -= 4;
+            platform.position.y -= 12;
 
             return platform;
         });
         enemies = enemies.map((enemy) => {
-            enemy.position.y -= 4;
+            enemy.position.y -= 12;
 
             return enemy;
         });
         fishes = fishes.map((fish) => {
-            fish.position.y -= 4;
+            fish.position.y -= 12;
 
             return fish;
         });
         catnip = catnip.map((leaf) => {
-            leaf.position.y -= 4;
+            leaf.position.y -= 12;
 
             return leaf;
         });
