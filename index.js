@@ -186,7 +186,7 @@ class Player {
         // if (this.position.y + this.height + this.velocity.y < canvas.height) {
 
         this.velocity.y += gravity;
-        if (this.position.y + this.height > innerWidth - 50) {
+        if (this.position.y + this.height > innerHeight - 50) {
             this.velocity.y = 0;
         }
         // }
@@ -221,6 +221,7 @@ class Enemy {
         this.enemyMovementTimer;
         this.enemyDirection;
         this.enemyType = enemyType;
+        this.setEnemyMotion();
     }
 
     setEnemyMotion = () => {
@@ -300,9 +301,8 @@ class Enemy {
 
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
-        if (this.position.y + this.height + this.velocity.y < canvas.height) {
-            this.velocity.y += gravity;
-        } else {
+        this.velocity.y += gravity;
+        if (this.position.y + this.height / 5 > innerHeight - 50) {
             this.velocity.y = 0;
         }
 
@@ -402,9 +402,9 @@ const keys = {
 };
 
 let enemies = [
-    new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
-    new Enemy(1000, 550, boarPNG, 720, 512, 2, "boar", false),
-    new Enemy(700, 535, monkeyPNG, 640, 600, 3, "monkey", false),
+    new Enemy(0, 0, boarPNG, 720, 512, 1, "boar", false),
+    new Enemy(800, 0, boarPNG, 720, 512, 2, "boar", false),
+    new Enemy(800, -350, monkeyPNG, 640, 600, 3, "monkey", false),
 ];
 let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
 let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
@@ -475,11 +475,12 @@ const getRectangleCollisions = () => {
         // enemies collision with platforms
         enemies.forEach((enemy) => {
             if (
-                enemy.position.y + enemy.height <= platform.position.y &&
-                enemy.position.y + enemy.height + 35 + enemy.velocity.y >=
+                enemy.position.y + enemy.height / 5 <= platform.position.y &&
+                enemy.position.y + enemy.height / 5 + enemy.velocity.y >=
                     platform.position.y &&
-                enemy.position.x + enemy.width >= platform.position.x &&
-                enemy.position.x <= platform.position.x + platform.width
+                enemy.position.x + enemy.width / 5 - 50 >=
+                    platform.position.x &&
+                enemy.position.x + 50 <= platform.position.x + platform.width
             ) {
                 enemy.velocity.y = 0;
             }
