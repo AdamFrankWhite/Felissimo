@@ -6,6 +6,7 @@
 
 body {
   overflow: hidden;
+  background: #272727;
 }
 
 canvas {
@@ -13,6 +14,10 @@ canvas {
   background-size: cover;
   background-position-y: 15%;
   display: block;
+  position: absolute;
+  inset: 0;
+  justify-content: center;
+  align-items: center;
   margin: auto;
   filter: sepia(4);
   filter: saturate(3.5);

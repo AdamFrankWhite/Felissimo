@@ -11,7 +11,6 @@ function preload(imageData) {
     });
 }
 
-console.log(images);
 //-- usage --//
 preload([
     "img/sprite/boar-dead-left.png",
@@ -31,6 +30,8 @@ preload([
     "img/sprite/monkey-idle.png",
     "img/sprite/monkey-walk-left.png",
     "img/sprite/monkey-walk-right.png",
+    "img/sprite/monkey-jump-left.png",
+    "img/sprite/monkey-jump-right.png",
     "img/sprite/run.png",
     "img/sprite/slide-left.png",
     "img/sprite/slide-right.png",
@@ -69,44 +70,41 @@ let enemyToRemove;
 let playerDirection = "";
 // set width and height to viewport dimensions
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width = 1500;
+canvas.height = 800;
 // const platformTexture = new Image('./')
 
 let platformPositions = [
-    { x: -50, y: 650, image: platformTexture },
-    { x: 150, y: 650, image: platformTexture },
-    { x: 350, y: 650, image: platformTexture },
-    { x: 550, y: 650, image: platformTexture },
-    { x: 750, y: 650, image: platformTexture },
-    { x: 950, y: 650, image: platformTexture },
-    { x: 1150, y: 650, image: platformTexture },
-    { x: 1350, y: 650, image: platformTexture },
-    { x: 1550, y: 650, image: platformTexture },
-    { x: 1200, y: 500, image: platformTexture },
-    { x: 1000, y: 300, image: platformTexture },
-    { x: 700, y: 200, image: platformTexture },
-    { x: 500, y: 200, image: platformTexture },
-    { x: 300, y: 200, image: platformTexture },
-    { x: 100, y: 200, image: platformTexture },
-    { x: 900, y: 0, image: platformTexture },
-    { x: 800, y: -100, image: platformTexture },
-    { x: 1000, y: -100, image: platformTexture },
-    { x: 1200, y: -100, image: platformTexture },
-    { x: 1400, y: -100, image: platformTexture },
-    { x: 1100, y: -300, image: platformTexture },
-    { x: 1200, y: -400, image: platformTexture },
-    { x: 1400, y: -400, image: platformTexture },
+    { x: -50, y: 650, image: platformTexture, type: "left" },
+    { x: 150, y: 650, image: platformTexture, type: "main" },
+    { x: 350, y: 650, image: platformTexture, type: "main" },
+    { x: 550, y: 650, image: platformTexture, type: "main" },
+    { x: 750, y: 650, image: platformTexture, type: "main" },
+    { x: 950, y: 650, image: platformTexture, type: "right" },
+    { x: 1150, y: 650, image: platformTexture, type: "left" },
+    { x: 1350, y: 650, image: platformTexture, type: "main" },
+    { x: 1550, y: 650, image: platformTexture, type: "right" },
+    { x: 1200, y: 500, image: platformTexture, type: "single" },
+    { x: 1000, y: 300, image: platformTexture, type: "single" },
+    { x: 700, y: 200, image: platformTexture, type: "left" },
+    { x: 500, y: 200, image: platformTexture, type: "main" },
+    { x: 300, y: 200, image: platformTexture, type: "main" },
+    { x: 100, y: 200, image: platformTexture, type: "right" },
+    { x: 900, y: 0, image: platformTexture, type: "single" },
+    { x: 800, y: -100, image: platformTexture, type: "left" },
+    { x: 1000, y: -100, image: platformTexture, type: "main" },
+    { x: 1200, y: -100, image: platformTexture, type: "main" },
+    { x: 1400, y: -100, image: platformTexture, type: "right" },
+    { x: 1100, y: -300, image: platformTexture, type: "single" },
+    { x: 1200, y: -400, image: platformTexture, type: "left" },
+    { x: 1400, y: -400, image: platformTexture, type: "right" },
 ];
 let fishPositions = [
-    { x: 600, y: 150 },
+    { x: 600, y: 100 },
     { x: 1100, y: 200 },
 ];
 
-let catnipPositions = [
-    { x: 0, y: 600 },
-    { x: 700, y: 200 },
-];
+let catnipPositions = [{ x: 0, y: 575 }];
 
 const setCatnipTimer = () => {
     isHighOnCatnip = true;
@@ -159,10 +157,8 @@ class Player {
     }
 
     update() {
-        console.log(player.position.x);
         // die if fall off screen
-        if (player.position.y > innerHeight) {
-            // console.log(player.position.y);
+        if (player.position.y > canvas.height) {
             // restartLevel();
         }
 
@@ -186,7 +182,7 @@ class Player {
         // if (this.position.y + this.height + this.velocity.y < canvas.height) {
 
         this.velocity.y += gravity;
-        if (this.position.y + this.height > innerHeight - 50) {
+        if (this.position.y + this.height > canvas.height - 50) {
             this.velocity.y = 0;
         }
         // }
@@ -232,7 +228,6 @@ class Enemy {
     switchEnemyMovement = () => {
         this.enemyDirection = "right";
         setInterval(() => {
-            // console.log(enemyMovementTimer, enemyDirection);
             if (this.enemyMovementTimer > 0) {
                 if (this.enemyDirection == "left") {
                     this.enemyDirection = "right";
@@ -240,6 +235,10 @@ class Enemy {
                     this.enemyDirection = "left";
                 }
                 this.enemyMovementTimer--;
+                if (this.enemyType == "monkey") {
+                    // this.velocity.y = -15;
+                    // this.velocity.x = 10;
+                }
             } else {
                 if (this.enemyDirection == "left") {
                     this.enemyDirection = "right";
@@ -247,6 +246,10 @@ class Enemy {
                     this.enemyDirection = "left";
                 }
                 this.enemyMovementTimer = 2;
+                if (this.enemyType == "monkey") {
+                    // this.velocity.y = -15;
+                    // this.velocity.x = 10;
+                }
             }
         }, 2000);
     };
@@ -274,14 +277,23 @@ class Enemy {
                 // once sprite complete, remove boar after slight delay
                 setTimeout(() => {
                     enemies = enemies.filter((enemy) => {
-                        console.log(enemy, enemyToRemove);
                         return enemy.id != enemyToRemove.id;
                     });
                     enemyToRemove = "";
                 }, 1000);
 
                 // this.frames = 0;
-            } else if (this.enemyType == "monkey" && this.frames == 13) {
+            } else if (
+                this.enemyType == "monkey" &&
+                !this.image.src.includes("monkey-dead") &&
+                this.frames == 13
+            ) {
+                this.frames = 0;
+            } else if (
+                this.enemyType == "monkey" &&
+                this.image.src.includes("monkey-jump") &&
+                this.frames == 4
+            ) {
                 this.frames = 0;
             } else if (this.frames == 17) {
                 this.frames = 0;
@@ -293,16 +305,18 @@ class Enemy {
         // check there is no boar to remove, to avoid issue with delay of settimeout for removing boar
         if (this.enemyDirection == "left" && !enemyToRemove) {
             this.image.src = `./img/sprite/${this.enemyType}-walk-left.png`;
+
             this.velocity.x = -2.5;
         } else if (this.enemyDirection == "right" && !enemyToRemove) {
             this.image.src = `./img/sprite/${this.enemyType}-walk-right.png`;
+
             this.velocity.x = 2.5;
         }
 
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
         this.velocity.y += gravity;
-        if (this.position.y + this.height > innerHeight - 50) {
+        if (this.position.y + this.height > canvas.height - 50) {
             this.velocity.y = 0;
         }
 
@@ -337,7 +351,7 @@ class ProgressBar {
 }
 
 class Platform {
-    constructor(x, y, image) {
+    constructor(x, y, image, type) {
         this.position = {
             x,
             y,
@@ -345,6 +359,7 @@ class Platform {
         this.width = image.width;
         this.height = image.height * 1.5;
         this.image = image;
+        this.type = type;
     }
     draw() {
         // ctx.fillStyle = "blue";
@@ -402,16 +417,18 @@ const keys = {
 };
 
 let enemies = [
-    new Enemy(0, 0, boarPNG, 720, 512, 1, "boar", false),
-    new Enemy(800, 0, boarPNG, 720, 512, 2, "boar", false),
-    new Enemy(800, -350, monkeyPNG, 640, 600, 3, "monkey", false),
+    new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
+    new Enemy(800, 530, monkeyPNG, 640, 600, 3, "monkey", false),
+    // new Enemy(800, 0, boarPNG, 720, 512, 2, "boar", false),
+    // new Enemy(800, -350, monkeyPNG, 640, 600, 3, "monkey", false),
 ];
 let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
 let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
 
 let player = new Player();
 let platforms = platformPositions.map(
-    (platform) => new Platform(platform.x, platform.y, platform.image)
+    (platform) =>
+        new Platform(platform.x, platform.y, platform.image, platform.type)
 );
 
 let fishes = fishPositions.map(
@@ -483,12 +500,25 @@ const getRectangleCollisions = () => {
             ) {
                 enemy.velocity.y = 0;
             }
+
+            // prevent enemies falling left
+            if (
+                enemy.position.x + enemy.width < platform.position.x &&
+                platform.type == "left"
+            ) {
+                console.log("computer left");
+                // enemy.switchEnemyMovement();
+            }
+            // if (enemy.velocity.y > 0) {
+            //     setEnemyMotion();
+            // }
         });
     });
 
     enemies.forEach((enemy) => {
         // Added width offsets to cater to sprite's padding
         //jump on enemy
+
         if (
             player.position.y + player.height <= enemy.position.y &&
             player.position.y + player.height + player.velocity.y >=
@@ -500,7 +530,6 @@ const getRectangleCollisions = () => {
 
             // only bounce on initial boar jump
             if (!enemy.image.src.includes(`${enemy.enemyType}-dead`)) {
-                console.log("killed");
                 player.velocity.y = -15;
                 enemy.counter = 0;
                 enemy.frames = 0;
@@ -524,6 +553,7 @@ const getRectangleCollisions = () => {
             player.position.x + player.width - 60 >= enemy.position.x &&
             player.position.x + 40 <= enemy.position.x + enemy.width
         ) {
+            console.log("hit");
             // set counter frames to 0 to avoid glitchy sprite
 
             // only bounce on initial boar jump
@@ -536,7 +566,6 @@ const getRectangleCollisions = () => {
             isPlayerHurt = true;
 
             healthBar.width = healthBar.width - 50;
-            console.log(healthBar.width);
             if (healthBar.width == 0) {
                 // player.velocity.x = 0;
                 // sprite.src = "./img/sprite/dead.png";
@@ -609,7 +638,6 @@ const animate = () => {
     fishes.forEach((fish) => fish.draw());
     catnip.forEach((leaf) => leaf.draw());
     enemies.forEach((enemy) => enemy.update());
-    console.log(player.position.y, player.velocity.y);
     if (player.position.y < 200) {
         player.position.y += 4;
         platforms = platforms.map((platform) => {
@@ -633,10 +661,9 @@ const animate = () => {
             return leaf;
         });
     } else if (
-        player.position.y > innerHeight - 200 &&
-        player.position.y - player.height < innerHeight
+        player.position.y > canvas.height - 225 &&
+        player.position.y - player.height < canvas.height
     ) {
-        console.log(player.position.y, player.velocity.y);
         // must minus player y pos too else won't collide with surfaces and falls through everything
         player.position.y -= 12;
         platforms = platforms.map((platform) => {
@@ -662,6 +689,7 @@ const animate = () => {
     }
 
     if (isPlayerHurt) {
+        // ensure player moves the correct direction
         player.velocity.x = playerDirection == "left" ? 5 : -5;
     } else if (keys.right.pressed && player.position.x < 750) {
         if (isHighOnCatnip) {

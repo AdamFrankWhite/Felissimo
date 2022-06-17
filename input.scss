@@ -6,12 +6,17 @@
 
 body {
     overflow: hidden;
+    background: rgb(39, 39, 39);
 }
 canvas {
     background: url('./img/forest-g5a6a09756_1920.jpg');
     background-size: cover;
     background-position-y: 15%;
-    display: block;
+    display:block;
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    align-items: center;
     margin: auto;  
     filter: sepia(4);
     filter: saturate(3.5);
