@@ -72,8 +72,10 @@ let playerDirection = "";
 
 canvas.width = 1500;
 canvas.height = 800;
-// const platformTexture = new Image('./')
-
+let lickSound = new Audio("./sound/cat-lick.mp3");
+lickSound.playbackRate = 2;
+let hurtSound = new Audio("./sound/cat-hurt.wav");
+hurtSound.playbackRate = 2;
 let platformPositions = [
     { x: -50, y: 650, image: platformTexture, type: "left" },
     { x: 150, y: 650, image: platformTexture, type: "main" },
@@ -84,7 +86,7 @@ let platformPositions = [
     { x: 1150, y: 650, image: platformTexture, type: "left" },
     { x: 1350, y: 650, image: platformTexture, type: "main" },
     { x: 1550, y: 650, image: platformTexture, type: "right" },
-    { x: 1200, y: 500, image: platformTexture, type: "single" },
+    { x: 1200, y: 510, image: platformTexture, type: "single" },
     { x: 1000, y: 300, image: platformTexture, type: "single" },
     { x: 700, y: 200, image: platformTexture, type: "left" },
     { x: 500, y: 200, image: platformTexture, type: "main" },
@@ -547,13 +549,14 @@ const getRectangleCollisions = () => {
         // touch enemy
         else if (
             !enemyToRemove &&
-            player.position.y <= enemy.position.y &&
+            player.position.y - 50 <= enemy.position.y &&
             player.position.y + player.height + player.velocity.y >=
                 enemy.position.y &&
             player.position.x + player.width - 60 >= enemy.position.x &&
-            player.position.x + 40 <= enemy.position.x + enemy.width
+            player.position.x + 40 <= enemy.position.x + enemy.width &&
+            !sprite.src.includes("hurt.png")
         ) {
-            console.log("hit");
+            hurtSound.play();
             // set counter frames to 0 to avoid glitchy sprite
 
             // only bounce on initial boar jump
@@ -596,6 +599,7 @@ const getRectangleCollisions = () => {
             fishes = fishes.filter(
                 (currentFish) => fish.position.x != currentFish.position.x
             );
+            lickSound.play();
             score += 50;
             if (healthBar.width < 400) {
                 healthBar.width += 50;
