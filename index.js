@@ -61,7 +61,7 @@ let catnipTimer = 0;
 const gravity = 1;
 let isJumping = false;
 let isHighOnCatnip = false;
-
+let isPlayerOnMovingPlatform = false;
 let isPlayerHurt = false;
 let enemyMovementTimer = 0;
 let enemyDirection;
@@ -77,15 +77,20 @@ lickSound.playbackRate = 2;
 let hurtSound = new Audio("./sound/cat-hurt.wav");
 hurtSound.playbackRate = 2;
 let platformPositions = [
-    { x: -50, y: 650, image: platformTexture, type: "left" },
-    { x: 150, y: 650, image: platformTexture, type: "main" },
-    { x: 350, y: 650, image: platformTexture, type: "main" },
-    { x: 550, y: 650, image: platformTexture, type: "main" },
-    { x: 750, y: 650, image: platformTexture, type: "main" },
-    { x: 950, y: 650, image: platformTexture, type: "right" },
-    { x: 1150, y: 650, image: platformTexture, type: "left" },
-    { x: 1350, y: 650, image: platformTexture, type: "main" },
-    { x: 1550, y: 650, image: platformTexture, type: "right" },
+    { x: -50, y: 700, image: platformTexture, type: "left" },
+    { x: 150, y: 700, image: platformTexture, type: "main" },
+    { x: 350, y: 700, image: platformTexture, type: "main" },
+    { x: 550, y: 700, image: platformTexture, type: "main" },
+    { x: 750, y: 700, image: platformTexture, type: "main" },
+    { x: 950, y: 700, image: platformTexture, type: "right" },
+    { x: 1150, y: 700, image: platformTexture, type: "left" },
+    { x: 1350, y: 700, image: platformTexture, type: "main" },
+    { x: 1550, y: 700, image: platformTexture, type: "main" },
+    { x: 1750, y: 700, image: platformTexture, type: "main" },
+    { x: 1950, y: 700, image: platformTexture, type: "main" },
+    { x: 2150, y: 700, image: platformTexture, type: "main" },
+    { x: 2350, y: 700, image: platformTexture, type: "main" },
+    { x: 1550, y: 700, image: platformTexture, type: "right" },
     { x: 1200, y: 510, image: platformTexture, type: "single" },
     { x: 1000, y: 300, image: platformTexture, type: "single" },
     { x: 700, y: 200, image: platformTexture, type: "left" },
@@ -96,7 +101,8 @@ let platformPositions = [
     { x: 800, y: -100, image: platformTexture, type: "left" },
     { x: 1000, y: -100, image: platformTexture, type: "main" },
     { x: 1200, y: -100, image: platformTexture, type: "main" },
-    { x: 1400, y: -100, image: platformTexture, type: "right" },
+    { x: 1400, y: -100, image: platformTexture, type: "main" },
+    { x: 1700, y: -100, image: platformTexture, type: "moving" },
     { x: 1100, y: -300, image: platformTexture, type: "single" },
     { x: 1200, y: -400, image: platformTexture, type: "left" },
     { x: 1400, y: -400, image: platformTexture, type: "right" },
@@ -358,14 +364,58 @@ class Platform {
             x,
             y,
         };
+        this.velocity = {
+            x: 0,
+            y: 0,
+        };
         this.width = image.width;
         this.height = image.height * 1.5;
         this.image = image;
-        this.type = type;
+        this.platformType = type;
+        this.platformMovementTimer;
+        this.platformDirection;
+        this.setPlatformMotion();
     }
+
+    setPlatformMotion = () => {
+        if (this.platformType == "moving") {
+            this.platformMovementTimer = 5;
+            this.switchPlatformMovement();
+        }
+    };
+
+    switchPlatformMovement = () => {
+        this.platformDirection = "right";
+        setInterval(() => {
+            if (this.platformMovementTimer > 0) {
+                if (this.platformDirection == "left") {
+                    this.platformDirection = "right";
+                } else if (this.platformDirection == "right") {
+                    this.platformDirection = "left";
+                }
+                this.platformMovementTimer--;
+            } else {
+                if (this.platformDirection == "left") {
+                    this.platformDirection = "right";
+                } else if (this.platformDirection == "right") {
+                    this.platformDirection = "left";
+                }
+                this.platformMovementTimer = 5;
+            }
+        }, 5000);
+    };
+
     draw() {
-        // ctx.fillStyle = "blue";
-        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        if (this.platformDirection == "left" && this.platformType == "moving") {
+            this.velocity.x = -2.5;
+        } else if (
+            this.platformDirection == "right" &&
+            this.platformType == "moving"
+        ) {
+            this.velocity.x = 2.5;
+        }
+        this.position.x += this.velocity.x;
+
         ctx.drawImage(
             this.image,
             0,
@@ -421,7 +471,7 @@ const keys = {
 let enemies = [
     new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
     new Enemy(800, 530, monkeyPNG, 640, 600, 3, "monkey", false),
-    // new Enemy(800, 0, boarPNG, 720, 512, 2, "boar", false),
+    new Enemy(1000, -300, boarPNG, 720, 512, 2, "boar", false),
     // new Enemy(800, -350, monkeyPNG, 640, 600, 3, "monkey", false),
 ];
 let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
@@ -479,16 +529,27 @@ function init() {
 
 const getRectangleCollisions = () => {
     platforms.forEach((platform) => {
-        // Added width offsets to cater to sprite's padding
-        if (
+        const isPlayerColliding =
             player.position.y + player.height <= platform.position.y &&
             player.position.y + player.height + player.velocity.y >=
                 platform.position.y &&
             player.position.x + player.width - 60 >= platform.position.x &&
-            player.position.x + 50 <= platform.position.x + platform.width
-        ) {
+            player.position.x + 50 <= platform.position.x + platform.width;
+        // Added width offsets to cater to sprite's padding
+        if (isPlayerColliding) {
             player.velocity.y = 0;
             isJumping = false;
+        }
+        // move player along with moving platform
+        if (isPlayerColliding && platform.platformType == "moving") {
+            isPlayerOnMovingPlatform = true;
+            if (platform.platformDirection == "left") {
+                player.position.x -= 2.5;
+            } else {
+                player.position.x += 2.5;
+            }
+        } else {
+            // isPlayerOnMovingPlatform = false
         }
 
         // enemies collision with platforms
@@ -546,7 +607,7 @@ const getRectangleCollisions = () => {
             // enemyToRemove = "";
         }
 
-        // touch enemy
+        // touch enemy - minus 50 off y pos to compensate for shorter enemies
         else if (
             !enemyToRemove &&
             player.position.y - 50 <= enemy.position.y &&
@@ -642,6 +703,8 @@ const animate = () => {
     fishes.forEach((fish) => fish.draw());
     catnip.forEach((leaf) => leaf.draw());
     enemies.forEach((enemy) => enemy.update());
+
+    // scroll screen y
     if (player.position.y < 200) {
         player.position.y += 4;
         platforms = platforms.map((platform) => {
@@ -695,6 +758,8 @@ const animate = () => {
     if (isPlayerHurt) {
         // ensure player moves the correct direction
         player.velocity.x = playerDirection == "left" ? 5 : -5;
+
+        // scroll screen
     } else if (keys.right.pressed && player.position.x < 750) {
         if (isHighOnCatnip) {
             player.velocity.x = 20;
