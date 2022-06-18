@@ -56,6 +56,8 @@ let barRed = "./img/bar-red.png";
 healthBarImg.src = barGreen;
 const platformTexture = new Image();
 platformTexture.src = "./img/platform.png";
+const movingPlatformTexture = new Image();
+movingPlatformTexture.src = "./img/platform-moving.png";
 let score = 0;
 let catnipTimer = 0;
 const gravity = 1;
@@ -78,34 +80,34 @@ let hurtSound = new Audio("./sound/cat-hurt.wav");
 hurtSound.playbackRate = 2;
 let platformPositions = [
     { x: -50, y: 700, image: platformTexture, type: "left" },
-    { x: 150, y: 700, image: platformTexture, type: "main" },
     { x: 350, y: 700, image: platformTexture, type: "main" },
-    { x: 550, y: 700, image: platformTexture, type: "main" },
     { x: 750, y: 700, image: platformTexture, type: "main" },
+    { x: 1150, y: 700, image: platformTexture, type: "main" },
+    { x: 1550, y: 700, image: platformTexture, type: "main" },
     { x: 950, y: 700, image: platformTexture, type: "right" },
     { x: 1150, y: 700, image: platformTexture, type: "left" },
     { x: 1350, y: 700, image: platformTexture, type: "main" },
-    { x: 1550, y: 700, image: platformTexture, type: "main" },
-    { x: 1750, y: 700, image: platformTexture, type: "main" },
-    { x: 1950, y: 700, image: platformTexture, type: "main" },
-    { x: 2150, y: 700, image: platformTexture, type: "main" },
-    { x: 2350, y: 700, image: platformTexture, type: "main" },
-    { x: 1550, y: 700, image: platformTexture, type: "right" },
-    { x: 1200, y: 510, image: platformTexture, type: "single" },
-    { x: 1000, y: 300, image: platformTexture, type: "single" },
+    { x: 1550, y: 700, image: movingPlatformTexture, type: "main" },
+    { x: 1750, y: 700, image: movingPlatformTexture, type: "main" },
+    { x: 1950, y: 700, image: movingPlatformTexture, type: "main" },
+    { x: 2150, y: 700, image: movingPlatformTexture, type: "main" },
+    { x: 2350, y: 700, image: movingPlatformTexture, type: "main" },
+    { x: 1550, y: 700, image: movingPlatformTexture, type: "right" },
+    { x: 1200, y: 510, image: movingPlatformTexture, type: "single" },
+    { x: 1000, y: 300, image: movingPlatformTexture, type: "single" },
     { x: 700, y: 200, image: platformTexture, type: "left" },
     { x: 500, y: 200, image: platformTexture, type: "main" },
     { x: 300, y: 200, image: platformTexture, type: "main" },
     { x: 100, y: 200, image: platformTexture, type: "right" },
-    { x: 900, y: 0, image: platformTexture, type: "single" },
-    { x: 800, y: -100, image: platformTexture, type: "left" },
-    { x: 1000, y: -100, image: platformTexture, type: "main" },
-    { x: 1200, y: -100, image: platformTexture, type: "main" },
-    { x: 1400, y: -100, image: platformTexture, type: "main" },
-    { x: 1700, y: -100, image: platformTexture, type: "moving" },
-    { x: 1100, y: -300, image: platformTexture, type: "single" },
-    { x: 1200, y: -400, image: platformTexture, type: "left" },
-    { x: 1400, y: -400, image: platformTexture, type: "right" },
+    { x: 900, y: 0, image: movingPlatformTexture, type: "single" },
+    { x: 800, y: -100, image: movingPlatformTexture, type: "left" },
+    { x: 1000, y: -100, image: movingPlatformTexture, type: "main" },
+    { x: 1200, y: -100, image: movingPlatformTexture, type: "main" },
+    { x: 1400, y: -100, image: movingPlatformTexture, type: "main" },
+    { x: 1700, y: -100, image: movingPlatformTexture, type: "moving" },
+    { x: 1100, y: -300, image: movingPlatformTexture, type: "single" },
+    { x: 1200, y: -400, image: movingPlatformTexture, type: "left" },
+    { x: 1400, y: -400, image: movingPlatformTexture, type: "right" },
 ];
 let fishPositions = [
     { x: 600, y: 100 },
@@ -360,6 +362,8 @@ class ProgressBar {
 
 class Platform {
     constructor(x, y, image, type) {
+        console.log(image.src.includes("/img/platform.png"));
+        this.scale = image.src.includes("/img/platform.png") ? 2 : 1;
         this.position = {
             x,
             y,
@@ -368,8 +372,8 @@ class Platform {
             x: 0,
             y: 0,
         };
-        this.width = image.width;
-        this.height = image.height * 1.5;
+        this.width = image.width / this.scale;
+        this.height = image.height / this.scale;
         this.image = image;
         this.platformType = type;
         this.platformMovementTimer;
@@ -420,8 +424,8 @@ class Platform {
             this.image,
             0,
             0,
-            this.width,
-            this.height,
+            this.width * this.scale,
+            this.height * this.scale,
             this.position.x,
             this.position.y,
             this.width,
