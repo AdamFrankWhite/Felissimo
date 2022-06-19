@@ -543,7 +543,9 @@ function playerDies() {
     sprite.src = "./img/sprite/dead.png";
     player.velocity.x = 0;
     player.velocity.y = 0;
-    // setTimeout(restartLevel(), 4000);
+    setTimeout(() => {
+        restartLevel();
+    }, 2000);
 }
 
 function restartLevel() {
@@ -560,10 +562,12 @@ function restartLevel() {
 
 function init() {
     isPlayerDead = false;
+    sprite.src = "./img/sprite/idle-right.png";
     enemies = [
         new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
-        new Enemy(1000, 550, boarPNG, 720, 512, 2, "boar", false),
-        new Enemy(700, 535, monkeyPNG, 640, 600, 3, "monkey", false),
+        new Enemy(1200, 530, monkeyPNG, 640, 600, 3, "monkey", false),
+        new Enemy(1000, -300, boarPNG, 720, 512, 2, "boar", false),
+        // new Enemy(800, -350, monkeyPNG, 640, 600, 3, "monkey", false),
     ];
     healthBarImg.src = barGreen;
     healthBar = new ProgressBar(50, 50, 400, healthBarImg);
@@ -571,7 +575,8 @@ function init() {
 
     player = new Player();
     platforms = platformPositions.map(
-        (platform) => new Platform(platform.x, platform.y, platform.image)
+        (platform) =>
+            new Platform(platform.x, platform.y, platform.image, platform.type)
     );
 
     fishes = fishPositions.map(
@@ -613,6 +618,7 @@ const getRectangleCollisions = () => {
             !isPlayerDead &&
             platform.platformType == "spike"
         ) {
+            console.log("spike");
             playerDies();
             isPlayerDead = true;
             keys.left.pressed = false;
@@ -767,6 +773,8 @@ const animate = () => {
     catnipBar.draw();
     // draw platforms first layer
     platforms.forEach((platform) => platform.draw());
+
+    getRectangleCollisions(platforms);
     fishes.forEach((fish) => fish.draw());
     catnip.forEach((leaf) => leaf.draw());
     enemies.forEach((enemy) => enemy.update());
@@ -914,8 +922,8 @@ const animate = () => {
         }
     }
     healthBar.draw();
+
     player.update();
-    getRectangleCollisions(platforms);
 };
 
 animate();
