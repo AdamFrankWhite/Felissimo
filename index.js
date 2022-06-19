@@ -37,6 +37,8 @@ preload([
     "img/sprite/slide-right.png",
     "img/sprite/walk-left.png",
     "img/sprite/walk-right.png",
+    "img/platform.png",
+    "img/platform-moving.png",
 ]);
 let sprite = new Image();
 sprite.src = "./img/sprite/idle-right.png";
@@ -58,6 +60,8 @@ const platformTexture = new Image();
 platformTexture.src = "./img/platform.png";
 const movingPlatformTexture = new Image();
 movingPlatformTexture.src = "./img/platform-moving.png";
+const spikeImg = new Image();
+spikeImg.src = "./img/spike.png";
 let score = 0;
 let catnipTimer = 0;
 const gravity = 1;
@@ -65,6 +69,7 @@ let isJumping = false;
 let isHighOnCatnip = false;
 let isPlayerOnMovingPlatform = false;
 let isPlayerHurt = false;
+let isPlayerDead = false;
 let enemyMovementTimer = 0;
 let enemyDirection;
 let jumpStrength = 1;
@@ -78,36 +83,56 @@ let lickSound = new Audio("./sound/cat-lick.mp3");
 lickSound.playbackRate = 2;
 let hurtSound = new Audio("./sound/cat-hurt.wav");
 hurtSound.playbackRate = 2;
+let spikeSound = new Audio("./sound/spike-trap.flac");
+spikeSound.playbackRate = 2;
 let platformPositions = [
     { x: -50, y: 700, image: platformTexture, type: "left" },
-    { x: 350, y: 700, image: platformTexture, type: "main" },
-    { x: 750, y: 700, image: platformTexture, type: "main" },
-    { x: 1150, y: 700, image: platformTexture, type: "main" },
-    { x: 1550, y: 700, image: platformTexture, type: "main" },
-    { x: 950, y: 700, image: platformTexture, type: "right" },
-    { x: 1150, y: 700, image: platformTexture, type: "left" },
-    { x: 1350, y: 700, image: platformTexture, type: "main" },
+    { x: 865, y: 750, image: spikeImg, type: "spike" },
+    { x: 910, y: 750, image: spikeImg, type: "spike" },
+    { x: 955, y: 750, image: spikeImg, type: "spike" },
+    { x: 1000, y: 750, image: spikeImg, type: "spike" },
+    { x: 1045, y: 750, image: spikeImg, type: "spike" },
+    // { x: 350, y: 700, image: platformTexture, type: "main" },
+    // { x: 750, y: 700, image: platformTexture, type: "main" },
+    // { x: 1550, y: 700, image: platformTexture, type: "main" },
+    // { x: 1550, y: 700, image: platformTexture, type: "main" },
+    // { x: 950, y: 700, image: platformTexture, type: "right" },
+    // { x: 1150, y: 700, image: platformTexture, type: "left" },
+    { x: 1080, y: 700, image: platformTexture, type: "main" },
     { x: 1550, y: 700, image: movingPlatformTexture, type: "main" },
     { x: 1750, y: 700, image: movingPlatformTexture, type: "main" },
     { x: 1950, y: 700, image: movingPlatformTexture, type: "main" },
     { x: 2150, y: 700, image: movingPlatformTexture, type: "main" },
     { x: 2350, y: 700, image: movingPlatformTexture, type: "main" },
     { x: 1550, y: 700, image: movingPlatformTexture, type: "right" },
-    { x: 1200, y: 510, image: movingPlatformTexture, type: "single" },
-    { x: 1000, y: 300, image: movingPlatformTexture, type: "single" },
+    { x: 1800, y: 510, image: movingPlatformTexture, type: "single" },
+    { x: 1600, y: 300, image: movingPlatformTexture, type: "single" },
     { x: 700, y: 200, image: platformTexture, type: "left" },
     { x: 500, y: 200, image: platformTexture, type: "main" },
     { x: 300, y: 200, image: platformTexture, type: "main" },
     { x: 100, y: 200, image: platformTexture, type: "right" },
-    { x: 900, y: 0, image: movingPlatformTexture, type: "single" },
-    { x: 800, y: -100, image: movingPlatformTexture, type: "left" },
-    { x: 1000, y: -100, image: movingPlatformTexture, type: "main" },
-    { x: 1200, y: -100, image: movingPlatformTexture, type: "main" },
-    { x: 1400, y: -100, image: movingPlatformTexture, type: "main" },
-    { x: 1700, y: -100, image: movingPlatformTexture, type: "moving" },
-    { x: 1100, y: -300, image: movingPlatformTexture, type: "single" },
-    { x: 1200, y: -400, image: movingPlatformTexture, type: "left" },
-    { x: 1400, y: -400, image: movingPlatformTexture, type: "right" },
+    { x: 600, y: 0, image: movingPlatformTexture, type: "single" },
+    { x: 800, y: -100, image: platformTexture, type: "left" },
+    { x: 1000, y: -100, image: platformTexture, type: "main" },
+    // { x: 1200, y: -100, image: platformTexture, type: "main" },
+    // { x: 1400, y: -100, image: platformTexture, type: "main" },
+    {
+        x: 2200,
+        y: -100,
+        image: movingPlatformTexture,
+        type: "moving",
+        speed: 1.5,
+    },
+    {
+        x: 3000,
+        y: -100,
+        image: movingPlatformTexture,
+        type: "moving",
+        speed: 2,
+    },
+    { x: 1100, y: -300, image: platformTexture, type: "single" },
+    { x: 1200, y: -400, image: platformTexture, type: "left" },
+    { x: 1400, y: -400, image: platformTexture, type: "right" },
 ];
 let fishPositions = [
     { x: 600, y: 100 },
@@ -147,6 +172,8 @@ class Player {
         };
         this.frames = 0;
         this.counter = 0;
+
+        this.offsetY = 10;
     }
     draw() {
         ctx.drawImage(
@@ -160,7 +187,7 @@ class Player {
                 : sprite.width / 8,
             sprite.height,
             this.position.x,
-            this.position.y + 10,
+            this.position.y + this.offsetY,
             this.width,
             this.height
         );
@@ -171,7 +198,6 @@ class Player {
         if (player.position.y > canvas.height) {
             // restartLevel();
         }
-
         if (isPlayerHurt) sprite.src = "./img/sprite/hurt.png";
         // slow down animation by 3
         if (this.counter == 3) {
@@ -183,6 +209,9 @@ class Player {
             if (sprite.src.includes("hurt.png") && this.frames == 6) {
                 this.frames = 0;
             }
+        } else if (isPlayerDead) {
+            this.offsetY = 30;
+            this.counter = 0;
         } else {
             this.counter++;
         }
@@ -361,9 +390,13 @@ class ProgressBar {
 }
 
 class Platform {
-    constructor(x, y, image, type) {
-        console.log(image.src.includes("/img/platform.png"));
-        this.scale = image.src.includes("/img/platform.png") ? 2 : 1;
+    constructor(x, y, image, type, speed) {
+        this.scale = image.src.includes("/img/platform.png")
+            ? 2
+            : image.src.includes("/img/spike.png")
+            ? 1.5
+            : 1;
+        // this.offsetY = image.src.includes("/img/spike.png") ? 50 : 0;
         this.position = {
             x,
             y,
@@ -372,6 +405,7 @@ class Platform {
             x: 0,
             y: 0,
         };
+        this.speed = speed;
         this.width = image.width / this.scale;
         this.height = image.height / this.scale;
         this.image = image;
@@ -383,7 +417,7 @@ class Platform {
 
     setPlatformMotion = () => {
         if (this.platformType == "moving") {
-            this.platformMovementTimer = 5;
+            this.platformMovementTimer = 5 / this.speed;
             this.switchPlatformMovement();
         }
     };
@@ -404,9 +438,9 @@ class Platform {
                 } else if (this.platformDirection == "right") {
                     this.platformDirection = "left";
                 }
-                this.platformMovementTimer = 5;
+                this.platformMovementTimer = 5 / this.speed;
             }
-        }, 5000);
+        }, 5000 / this.speed);
     };
 
     draw() {
@@ -418,7 +452,9 @@ class Platform {
         ) {
             this.velocity.x = 2.5;
         }
-        this.position.x += this.velocity.x;
+        if (this.platformType == "moving") {
+            this.position.x += this.velocity.x * this.speed;
+        }
 
         ctx.drawImage(
             this.image,
@@ -474,7 +510,7 @@ const keys = {
 
 let enemies = [
     new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
-    new Enemy(800, 530, monkeyPNG, 640, 600, 3, "monkey", false),
+    new Enemy(1200, 530, monkeyPNG, 640, 600, 3, "monkey", false),
     new Enemy(1000, -300, boarPNG, 720, 512, 2, "boar", false),
     // new Enemy(800, -350, monkeyPNG, 640, 600, 3, "monkey", false),
 ];
@@ -484,7 +520,13 @@ let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
 let player = new Player();
 let platforms = platformPositions.map(
     (platform) =>
-        new Platform(platform.x, platform.y, platform.image, platform.type)
+        new Platform(
+            platform.x,
+            platform.y,
+            platform.image,
+            platform.type,
+            platform.speed
+        )
 );
 
 let fishes = fishPositions.map(
@@ -494,6 +536,15 @@ let fishes = fishPositions.map(
 let catnip = catnipPositions.map(
     (item) => new Item(item.x, item.y, catnipPNG, "catnip")
 );
+
+function playerDies() {
+    spikeSound.play();
+    isPlayerDead = true;
+    sprite.src = "./img/sprite/dead.png";
+    player.velocity.x = 0;
+    player.velocity.y = 0;
+    // setTimeout(restartLevel(), 4000);
+}
 
 function restartLevel() {
     let num = 1;
@@ -508,6 +559,7 @@ function restartLevel() {
 }
 
 function init() {
+    isPlayerDead = false;
     enemies = [
         new Enemy(300, 0, boarPNG, 720, 512, 1, "boar", false),
         new Enemy(1000, 550, boarPNG, 720, 512, 2, "boar", false),
@@ -548,12 +600,23 @@ const getRectangleCollisions = () => {
         if (isPlayerColliding && platform.platformType == "moving") {
             isPlayerOnMovingPlatform = true;
             if (platform.platformDirection == "left") {
-                player.position.x -= 2.5;
+                player.position.x -= 2.5 * platform.speed;
             } else {
-                player.position.x += 2.5;
+                player.position.x += 2.5 * platform.speed;
             }
         } else {
             // isPlayerOnMovingPlatform = false
+        }
+        // check if playerdead to ensure only plays once
+        if (
+            isPlayerColliding &&
+            !isPlayerDead &&
+            platform.platformType == "spike"
+        ) {
+            playerDies();
+            isPlayerDead = true;
+            keys.left.pressed = false;
+            keys.right.pressed = false;
         }
 
         // enemies collision with platforms
@@ -858,62 +921,64 @@ const animate = () => {
 animate();
 
 addEventListener("keydown", ({ key }) => {
-    switch (key) {
-        case "a":
-            sprite.src = "./img/sprite/walk-left.png";
-            keys.left.pressed = true;
-            playerDirection = "left";
-            break;
-        case "s":
-            if (keys.left.pressed) {
-                sprite.src = "./img/sprite/slide-left.png";
-            } else {
-                sprite.src = "./img/sprite/slide-right.png";
-            }
+    if (!isPlayerDead)
+        switch (key) {
+            case "a":
+                sprite.src = "./img/sprite/walk-left.png";
+                keys.left.pressed = true;
+                playerDirection = "left";
+                break;
+            case "s":
+                if (keys.left.pressed) {
+                    sprite.src = "./img/sprite/slide-left.png";
+                } else {
+                    sprite.src = "./img/sprite/slide-right.png";
+                }
 
-            break;
-        case "d":
-            sprite.src = "./img/sprite/walk-right.png";
-            keys.right.pressed = true;
-            playerDirection = "right";
-            break;
-        case "w":
-            // simply checking velocity y == 0 doesn't work as it can be greater due to gravity creating jumping bugginess
-            // instead check state of jumping and check velocity is negligible as when landing it is sometimes 1/2/3
-            // prevent double jumps
+                break;
+            case "d":
+                sprite.src = "./img/sprite/walk-right.png";
+                keys.right.pressed = true;
+                playerDirection = "right";
+                break;
+            case "w":
+                // simply checking velocity y == 0 doesn't work as it can be greater due to gravity creating jumping bugginess
+                // instead check state of jumping and check velocity is negligible as when landing it is sometimes 1/2/3
+                // prevent double jumps
 
-            if (!isJumping && player.velocity.y <= 5) {
-                player.velocity.y -= 20;
-            }
-            isJumping = true;
-            break;
-    }
+                if (!isJumping && player.velocity.y <= 5) {
+                    player.velocity.y -= 20;
+                }
+                isJumping = true;
+                break;
+        }
 });
 
 addEventListener("keyup", ({ key }) => {
-    switch (key) {
-        case "a":
-            keys.left.pressed = false;
-            // ensure right key is depressed to avoid sprite bug when rapidly changing direction
-            if (!keys.right.pressed) {
-                sprite.src = "./img/sprite/idle-left.png";
-            }
-            break;
-        case "s":
-            if (keys.left.pressed) {
-                sprite.src = "./img/sprite/walk-left.png";
-            } else {
-                sprite.src = "./img/sprite/walk-right.png";
-            }
-            break;
-        case "d":
-            keys.right.pressed = false;
-            // ensure left key is depressed to avoid sprite bug when rapidly changing direction
-            if (!keys.left.pressed) {
-                sprite.src = "./img/sprite/idle-right.png";
-            }
-            break;
-        case "w":
-            break;
-    }
+    if (!isPlayerDead)
+        switch (key) {
+            case "a":
+                keys.left.pressed = false;
+                // ensure right key is depressed to avoid sprite bug when rapidly changing direction
+                if (!keys.right.pressed) {
+                    sprite.src = "./img/sprite/idle-left.png";
+                }
+                break;
+            case "s":
+                if (keys.left.pressed) {
+                    sprite.src = "./img/sprite/walk-left.png";
+                } else {
+                    sprite.src = "./img/sprite/walk-right.png";
+                }
+                break;
+            case "d":
+                keys.right.pressed = false;
+                // ensure left key is depressed to avoid sprite bug when rapidly changing direction
+                if (!keys.left.pressed) {
+                    sprite.src = "./img/sprite/idle-right.png";
+                }
+                break;
+            case "w":
+                break;
+        }
 });
