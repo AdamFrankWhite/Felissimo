@@ -62,6 +62,8 @@ const movingPlatformTexture = new Image();
 movingPlatformTexture.src = "./img/platform-moving.png";
 const spikeImg = new Image();
 spikeImg.src = "./img/spike.png";
+const lifePNG = new Image();
+lifePNG.src = "./img/life-icon.png";
 let score = 0;
 let catnipTimer = 0;
 const gravity = 1;
@@ -76,7 +78,7 @@ let jumpStrength = 1;
 let enemyToRemove;
 let playerDirection = "";
 // set width and height to viewport dimensions
-
+let playerLives = 5;
 canvas.width = 1500;
 canvas.height = 800;
 let lickSound = new Audio("./sound/cat-lick.mp3");
@@ -85,6 +87,7 @@ let hurtSound = new Audio("./sound/cat-hurt.wav");
 hurtSound.playbackRate = 2;
 let spikeSound = new Audio("./sound/spike-trap.flac");
 spikeSound.playbackRate = 2;
+
 let platformPositions = [
     { x: -50, y: 700, image: platformTexture, type: "left" },
     { x: 869, y: 752, image: spikeImg, type: "spike" },
@@ -172,6 +175,7 @@ let fishPositions = [
 ];
 
 let catnipPositions = [{ x: 0, y: 575 }];
+let livesPositions = [{ x: 200, y: 575 }];
 
 const setCatnipTimer = () => {
     isHighOnCatnip = true;
@@ -548,7 +552,6 @@ let enemies = [
 ];
 let healthBar = new ProgressBar(50, 50, 400, healthBarImg);
 let catnipBar = new ProgressBar(50, 150, 0, catnipBarImg);
-
 let player = new Player();
 let platforms = platformPositions.map(
     (platform) =>
@@ -568,10 +571,14 @@ let fishes = fishPositions.map(
 let catnip = catnipPositions.map(
     (item) => new Item(item.x, item.y, catnipPNG, "catnip")
 );
+let lives = livesPositions.map(
+    (item) => new Item(item.x, item.y, lifePNG, "life")
+);
 
 function playerDies() {
     spikeSound.play();
     isPlayerDead = true;
+    playerLives -= 1;
     sprite.src = "./img/sprite/dead.png";
     player.velocity.x = 0;
     player.velocity.y = 0;
@@ -618,6 +625,9 @@ function init() {
     catnip = catnipPositions.map(
         (item) => new Item(item.x, item.y, catnipPNG, "catnip")
     );
+    // lives = livesPositions.map(
+    //     (item) => new Item(item.x, item.y, lifePNG, "life")
+    // );
 }
 
 const getRectangleCollisions = () => {
@@ -651,6 +661,7 @@ const getRectangleCollisions = () => {
             platform.platformType == "spike"
         ) {
             console.log("spike");
+            healthBar.width = 0;
             playerDies();
             isPlayerDead = true;
             keys.left.pressed = false;
@@ -738,7 +749,12 @@ const getRectangleCollisions = () => {
             if (healthBar.width == 0) {
                 // player.velocity.x = 0;
                 // sprite.src = "./img/sprite/dead.png";
-                restartLevel();
+
+                playerDies();
+                isPlayerHurt = false;
+                isPlayerDead = true;
+                keys.left.pressed = false;
+                keys.right.pressed = false;
             } else if (healthBar.width <= 100) {
                 healthBarImg.src = barRed;
             } else if (healthBar.width <= 250) {
@@ -746,10 +762,12 @@ const getRectangleCollisions = () => {
             } else if (healthBar.width == 400) {
                 healthBarImg.src = barGreen;
             }
-            setTimeout(() => {
-                isPlayerHurt = false;
-                sprite.src = "./img/sprite/idle-right.png";
-            }, 400);
+            if (!isPlayerDead) {
+                setTimeout(() => {
+                    isPlayerHurt = false;
+                    sprite.src = "./img/sprite/idle-right.png";
+                }, 400);
+            }
         }
     });
 
@@ -796,6 +814,22 @@ const getRectangleCollisions = () => {
             setCatnipTimer();
         }
     });
+
+    lives.forEach((life) => {
+        // Added width offsets to cater to sprite's padding
+        if (
+            player.position.y <= life.position.y &&
+            player.position.y + player.height + player.velocity.y >=
+                life.position.y &&
+            player.position.x + player.width - 60 >= life.position.x &&
+            player.position.x + 40 <= life.position.x + life.width / 4
+        ) {
+            lives = lives.filter(
+                (currentLife) => life.position.x != currentLife.position.x
+            );
+            playerLives += 1;
+        }
+    });
 };
 
 const animate = () => {
@@ -810,7 +844,18 @@ const animate = () => {
     fishes.forEach((fish) => fish.draw());
     catnip.forEach((leaf) => leaf.draw());
     enemies.forEach((enemy) => enemy.update());
-
+    lives.forEach((life) => life.draw());
+    ctx.drawImage(
+        lifePNG,
+        canvas.width - 90,
+        30,
+        lifePNG.width / 2.5,
+        lifePNG.height / 2.5
+    );
+    ctx.font = "75px Pacifico";
+    ctx.fillStyle = "white";
+    ctx.fillText(`${playerLives}`, canvas.width - 135, 85);
+    // playerLivesIcon.draw();
     // scroll screen y
     if (player.position.y < 200) {
         player.position.y += 4;
@@ -833,6 +878,11 @@ const animate = () => {
             leaf.position.y += 4;
 
             return leaf;
+        });
+        lives = lives.map((life) => {
+            life.position.y += 4;
+
+            return life;
         });
     } else if (
         player.position.y > canvas.height - 225 &&
@@ -859,6 +909,11 @@ const animate = () => {
             leaf.position.y -= 12;
 
             return leaf;
+        });
+        lives = lives.map((life) => {
+            life.position.y -= 12;
+
+            return life;
         });
     }
 
@@ -917,6 +972,14 @@ const animate = () => {
                 }
                 return leaf;
             });
+            lives = lives.map((life) => {
+                if (isHighOnCatnip) {
+                    life.position.x -= 10;
+                } else {
+                    life.position.x -= 5;
+                }
+                return life;
+            });
         } else if (keys.left.pressed) {
             platforms = platforms.map((platform) => {
                 if (isHighOnCatnip) {
@@ -950,6 +1013,14 @@ const animate = () => {
                     leaf.position.x += 5;
                 }
                 return leaf;
+            });
+            lives = lives.map((life) => {
+                if (isHighOnCatnip) {
+                    life.position.x += 10;
+                } else {
+                    life.position.x += 5;
+                }
+                return life;
             });
         }
     }
