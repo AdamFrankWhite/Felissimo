@@ -64,6 +64,8 @@ const spikeImg = new Image();
 spikeImg.src = "./img/spike.png";
 const lifePNG = new Image();
 lifePNG.src = "./img/life-icon.png";
+const platformSlopeRight = new Image();
+platformSlopeRight.src = "./img/platform-slope-right.png";
 let score = 0;
 let catnipTimer = 0;
 const gravity = 1;
@@ -87,9 +89,13 @@ let hurtSound = new Audio("./sound/cat-hurt.wav");
 hurtSound.playbackRate = 2;
 let spikeSound = new Audio("./sound/spike-trap.flac");
 spikeSound.playbackRate = 2;
+let backgroundMusic = new Audio("./sound/theme.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.4;
 
 let platformPositions = [
     { x: -50, y: 700, image: platformTexture, type: "left" },
+    { x: 250, y: 550, image: platformSlopeRight, type: "sloping-right" },
     { x: 869, y: 752, image: spikeImg, type: "spike" },
     { x: 899, y: 752, image: spikeImg, type: "spike" },
     { x: 929, y: 752, image: spikeImg, type: "spike" },
@@ -167,7 +173,7 @@ let platformPositions = [
         type: "moving",
         speed: 2,
     },
-    { x: 1100, y: -200, image: platformTexture, type: "single" },
+    { x: 1100, y: -200, image: platformSlopeRight, type: "sloping-right" },
 ];
 let fishPositions = [
     { x: 600, y: 100 },
@@ -427,11 +433,13 @@ class ProgressBar {
 
 class Platform {
     constructor(x, y, image, type, speed) {
-        this.scale = image.src.includes("/img/platform.png")
-            ? 2
-            : image.src.includes("/img/spike.png")
-            ? 2.4
-            : 1;
+        this.scale =
+            image.src.includes("/img/platform.png") ||
+            image.src.includes("slope")
+                ? 2
+                : image.src.includes("/img/spike.png")
+                ? 2.4
+                : 1;
         // this.offsetY = image.src.includes("/img/spike.png") ? 50 : 0;
         this.position = {
             x,
@@ -629,7 +637,6 @@ function init() {
     //     (item) => new Item(item.x, item.y, lifePNG, "life")
     // );
 }
-
 const getRectangleCollisions = () => {
     platforms.forEach((platform) => {
         const isPlayerColliding =
@@ -666,6 +673,30 @@ const getRectangleCollisions = () => {
             isPlayerDead = true;
             keys.left.pressed = false;
             keys.right.pressed = false;
+        }
+
+        // moving down slopes
+        if (
+            isPlayerColliding &&
+            !isPlayerDead &&
+            platform.platformType == "sloping-right"
+        ) {
+            let offsetY =
+                platform.position.x + platform.width - player.position.x;
+            console.log("slope-right");
+            if (keys.right.pressed) {
+                player.offsetY += 2.5;
+            } else if (keys.left.pressed) {
+                player.offsetY -= 2.5;
+            }
+        } else if (
+            isPlayerColliding &&
+            !isPlayerDead &&
+            platform.platformType != "sloping-right"
+        ) {
+            // reset offset
+
+            player.offsetY = 10;
         }
 
         // enemies collision with platforms
@@ -852,7 +883,7 @@ const animate = () => {
         lifePNG.width / 2.5,
         lifePNG.height / 2.5
     );
-    ctx.font = "75px Pacifico";
+    ctx.font = "80px Pacifico";
     ctx.fillStyle = "white";
     ctx.fillText(`${playerLives}`, canvas.width - 135, 85);
     // playerLivesIcon.draw();
@@ -1032,6 +1063,7 @@ const animate = () => {
 animate();
 
 addEventListener("keydown", ({ key }) => {
+    backgroundMusic.play();
     if (!isPlayerDead)
         switch (key) {
             case "a":
