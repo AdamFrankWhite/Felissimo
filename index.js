@@ -95,7 +95,7 @@ backgroundMusic.volume = 0.4;
 
 let platformPositions = [
     { x: -50, y: 700, image: platformTexture, type: "left" },
-    { x: 250, y: 550, image: platformSlopeRight, type: "sloping-right" },
+    { x: -450, y: 550, image: platformSlopeRight, type: "sloping-right" },
     { x: 869, y: 752, image: spikeImg, type: "spike" },
     { x: 899, y: 752, image: spikeImg, type: "spike" },
     { x: 929, y: 752, image: spikeImg, type: "spike" },
@@ -646,7 +646,7 @@ const getRectangleCollisions = () => {
             player.position.x + player.width - 60 >= platform.position.x &&
             player.position.x + 50 <= platform.position.x + platform.width;
         // Added width offsets to cater to sprite's padding
-        if (isPlayerColliding) {
+        if (isPlayerColliding && platform.platformType != "sloping-right") {
             player.velocity.y = 0;
             isJumping = false;
         }
@@ -676,18 +676,22 @@ const getRectangleCollisions = () => {
         }
 
         // moving down slopes
+        let offsetY = player.position.x - platform.position.x;
         if (
-            isPlayerColliding &&
+            player.position.y + player.height <= platform.position.y &&
+            player.position.y + player.height + offsetY >=
+                platform.position.y &&
+            player.position.x + player.width - 60 >= platform.position.x &&
+            player.position.x + 50 <= platform.position.x + platform.width &&
             !isPlayerDead &&
             platform.platformType == "sloping-right"
         ) {
-            let offsetY =
-                platform.position.x + platform.width - player.position.x;
+            player.velocity.y = 0;
             console.log("slope-right");
             if (keys.right.pressed) {
-                player.offsetY += 2.5;
+                player.offsetY += 3.5;
             } else if (keys.left.pressed) {
-                player.offsetY -= 2.5;
+                player.offsetY -= 3.5;
             }
         } else if (
             isPlayerColliding &&
