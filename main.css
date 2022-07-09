@@ -13,7 +13,6 @@ canvas {
   background: url("./img/forest-g5a6a09756_1920.jpg");
   background-size: cover;
   background-position-y: 15%;
-  display: block;
   position: absolute;
   inset: 0;
   justify-content: center;

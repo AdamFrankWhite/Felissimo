@@ -95,7 +95,7 @@ backgroundMusic.volume = 0.4;
 
 let platformPositions = [
     { x: -50, y: 700, image: platformTexture, type: "left" },
-    { x: 250, y: 550, image: platformSlopeRight, type: "sloping-right" },
+    // { x: 250, y: 550, image: platformSlopeRight, type: "sloping-right" },
     { x: 869, y: 752, image: spikeImg, type: "spike" },
     { x: 899, y: 752, image: spikeImg, type: "spike" },
     { x: 929, y: 752, image: spikeImg, type: "spike" },
@@ -676,28 +676,39 @@ const getRectangleCollisions = () => {
         }
 
         // moving down slopes
-        if (
-            isPlayerColliding &&
-            !isPlayerDead &&
-            platform.platformType == "sloping-right"
-        ) {
-            let offsetY =
-                platform.position.x + platform.width - player.position.x;
-            console.log("slope-right");
-            if (keys.right.pressed) {
-                player.offsetY += 2.5;
-            } else if (keys.left.pressed) {
-                player.offsetY -= 2.5;
-            }
-        } else if (
-            isPlayerColliding &&
-            !isPlayerDead &&
-            platform.platformType != "sloping-right"
-        ) {
-            // reset offset
+        // if (platform.platformType == "sloping-right") {
+        //     let slope = ctx;
+        //     slope.beginPath();
+        //     slope.moveTo(platform.position.x, platform.position.y);
+        //     slope.lineTo(
+        //         platform.position.x + platform.width,
+        //         platform.position.y + 125
+        //     );
+        //     slope.stroke();
+        //     console.log(slope);
+        // }
+        // if (
+        //     isPlayerColliding &&
+        //     !isPlayerDead &&
+        //     platform.platformType == "sloping-right"
+        // ) {
+        //     let offsetY =
+        //         platform.position.x + platform.width - player.position.x;
+        //     console.log("slope-right");
+        //     if (keys.right.pressed) {
+        //         player.offsetY += 2.5;
+        //     } else if (keys.left.pressed) {
+        //         player.offsetY -= 2.5;
+        //     }
+        // } else if (
+        //     isPlayerColliding &&
+        //     !isPlayerDead &&
+        //     platform.platformType != "sloping-right"
+        // ) {
+        //     // reset offset
 
-            player.offsetY = 10;
-        }
+        //     player.offsetY = 10;
+        // }
 
         // enemies collision with platforms
         enemies.forEach((enemy) => {
