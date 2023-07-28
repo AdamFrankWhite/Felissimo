@@ -9,7 +9,8 @@ body {
     background: rgb(39, 39, 39);
 }
 canvas {
-    background: url('./img/forest-g5a6a09756_1920.jpg');
+    visibility: hidden;
+    background: url("./img/forest-g5a6a09756_1920.jpg");
     background-size: cover;
     background-position-y: 15%;
     // display:block;
@@ -17,8 +18,24 @@ canvas {
     inset: 0;
     justify-content: center;
     align-items: center;
-    margin: auto;  
+    margin: auto;
     filter: sepia(4);
     filter: saturate(3.5);
-  
+}
+
+#asset-load-screen {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    h1 {
+        text-align: center;
+        color: white;
+    }
 }
